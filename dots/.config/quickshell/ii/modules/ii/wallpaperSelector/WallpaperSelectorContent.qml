@@ -369,11 +369,17 @@ MouseArea {
                         IconToolbarButton {
                             implicitWidth: height
                             onClicked: {
-                                Wallpapers.randomFromCurrentFolder();
+                                if (root.showingWEWallpapers) {
+                                    WallpaperEngine.randomWallpaper(root.useDarkMode);
+                                } else {
+                                    Wallpapers.randomFromCurrentFolder();
+                                }
                             }
                             text: "ifl"
                             StyledToolTip {
-                                text: Translation.tr("Pick random from this folder")
+                                text: root.showingWEWallpapers
+                                    ? Translation.tr("Pick random WE wallpaper")
+                                    : Translation.tr("Pick random from this folder")
                             }
                         }
 

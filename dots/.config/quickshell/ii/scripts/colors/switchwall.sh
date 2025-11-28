@@ -354,6 +354,10 @@ main() {
             --noswitch)
                 noswitch_flag="1"
                 imgpath=$(jq -r '.background.wallpaperPath' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "")
+                # Handle Wallpaper Engine: use thumbnailPath for color generation
+                if [[ "$imgpath" == WE:* ]]; then
+                    imgpath=$(jq -r '.background.thumbnailPath' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "")
+                fi
                 shift
                 ;;
             *)
