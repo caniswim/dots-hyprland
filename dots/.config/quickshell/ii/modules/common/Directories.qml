@@ -42,6 +42,9 @@ Singleton {
     property string cliphistDecode: FileUtils.trimFileProtocol(`/tmp/quickshell/media/cliphist`)
     property string screenshotTemp: "/tmp/quickshell/media/screenshot"
     property string wallpaperSwitchScriptPath: FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)
+    property string weWallpaperScriptPath: FileUtils.trimFileProtocol(`${Directories.scriptPath}/wallpaperengine/apply-we-wallpaper.sh`)
+    property string weWorkshopPath: "/mnt/Games/SteamLibrary/steamapps/workshop/content/431960"
+    property string weThumbnailCache: FileUtils.trimFileProtocol(`${Directories.cache}/media/we-wallpapers`)
     property string defaultAiPrompts: Quickshell.shellPath("defaults/ai/prompts")
     property string userAiPrompts: FileUtils.trimFileProtocol(`${Directories.shellConfig}/ai/prompts`)
     property string userActions: FileUtils.trimFileProtocol(`${Directories.shellConfig}/actions`)
