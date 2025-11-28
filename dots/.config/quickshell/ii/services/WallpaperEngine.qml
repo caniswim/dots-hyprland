@@ -246,6 +246,16 @@ Singleton {
         return wp
     }
 
+    // Pick random WE wallpaper (excludes ignored ones)
+    function randomWallpaper(darkMode = Appearance.m3colors.darkmode) {
+        const visibleWallpapers = root.weWallpapers.filter(wp => !root.ignoredWallpapers[wp.workshopId])
+        if (visibleWallpapers.length === 0) return
+        const randomIndex = Math.floor(Math.random() * visibleWallpapers.length)
+        const wp = visibleWallpapers[randomIndex]
+        console.log("[WallpaperEngine] Randomly selected:", wp.title, wp.workshopId)
+        Wallpapers.applyWEWallpaper(wp.workshopId, darkMode)
+    }
+
     // Get wallpaper type icon for UI
     function getTypeIcon(type) {
         switch (type) {
