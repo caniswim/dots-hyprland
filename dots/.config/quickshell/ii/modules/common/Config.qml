@@ -200,6 +200,11 @@ Singleton {
                         property real y: 100
                     }
                 }
+                property JsonObject wallpaperEngine: JsonObject {
+                    property bool isActive: false
+                    property string workshopId: ""
+                    property string type: ""
+                }
                 property string wallpaperPath: ""
                 property string thumbnailPath: ""
                 property bool hideWhenFullscreen: true
