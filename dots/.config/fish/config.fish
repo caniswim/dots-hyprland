@@ -6,6 +6,8 @@ function fish_prompt -d "Write out the prompt"
         (set_color $fish_color_cwd) (prompt_pwd) (set_color normal)
 end
 
+fish_add_path ~/.npm-global/bin
+
 if status is-interactive # Commands to run in interactive sessions can go here
 
     # No greeting
