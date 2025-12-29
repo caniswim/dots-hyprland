@@ -11,6 +11,7 @@ StyledOverlayWidget {
     showClickabilityButton: false
     resizable: false
     clickthrough: true
+    opacity: Config.options.overlay.floatingImage.opacity
 
     property string imageSource: Config.options.overlay.floatingImage.imageSource
     property real scaleFactor: Config.options.overlay.floatingImage.scale

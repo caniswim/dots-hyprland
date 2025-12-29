@@ -341,6 +341,17 @@ ContentPage {
                 Config.options.overlay.floatingImage.imageSource = text;
             }
         }
+        ConfigSpinBox {
+            icon: "opacity"
+            text: Translation.tr("Opacity (%)")
+            value: Config.options.overlay.floatingImage.opacity * 100
+            from: 10
+            to: 100
+            stepSize: 5
+            onValueChanged: {
+                Config.options.overlay.floatingImage.opacity = value / 100;
+            }
+        }
     }
 
     ContentSection {
