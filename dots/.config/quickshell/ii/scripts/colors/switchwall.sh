@@ -167,6 +167,13 @@ set_thumbnail_path() {
     fi
 }
 
+set_accent_color() {
+    local color="$1"
+    if [ -f "$SHELL_CONFIG_FILE" ]; then
+        jq --arg color "$color" '.appearance.palette.accentColor = $color' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
+    fi
+}
+
 switch() {
     imgpath="$1"
     mode_flag="$2"
@@ -187,15 +194,9 @@ switch() {
     cursorposy=$(bc <<< "scale=0; ($cursorposy - $screeny) * $scale / 1")
     cursorposy_inverted=$((screensizey - cursorposy))
 
-    if [[ "$color_flag" == "1" ]]; then
-        matugen_args=(color hex "$color")
-        generate_colors_material_args=(--color "$color")
-    else
-        if [[ -z "$imgpath" ]]; then
-            echo 'Aborted'
-            exit 0
-        fi
-
+    # Step 1: Process wallpaper if an image was provided (independent of color_flag)
+    local thumbnail=""
+    if [[ -n "$imgpath" ]]; then
         check_and_prompt_upscale "$imgpath" &
         kill_existing_mpvpaper
 
@@ -246,8 +247,6 @@ switch() {
             set_thumbnail_path "$thumbnail"
 
             if [ -f "$thumbnail" ]; then
-                matugen_args=(image "$thumbnail")
-                generate_colors_material_args=(--path "$thumbnail")
                 create_restore_script "$video_path"
             else
                 echo "Cannot create image to colorgen"
@@ -255,12 +254,33 @@ switch() {
                 exit 1
             fi
         else
-            matugen_args=(image "$imgpath")
-            generate_colors_material_args=(--path "$imgpath")
-            # Update wallpaper path in config
+            # Static image: update wallpaper path
             set_wallpaper_path "$imgpath"
             remove_restore
         fi
+    fi
+
+    # Step 2: Configure color generation args
+    # If an image was provided, ALWAYS use it for colors (clear accentColor behavior)
+    # Only use fixed color when no image is provided (e.g., --color without --image)
+    if [[ -n "$imgpath" ]]; then
+        # Use image/thumbnail for theme generation (wallpaper change resets to image-based colors)
+        if is_video "$imgpath" && [[ -n "$thumbnail" ]]; then
+            matugen_args=(image "$thumbnail")
+            generate_colors_material_args=(--path "$thumbnail")
+        else
+            matugen_args=(image "$imgpath")
+            generate_colors_material_args=(--path "$imgpath")
+        fi
+        # Clear accentColor since we're switching to image-based colors
+        set_accent_color ""
+    elif [[ "$color_flag" == "1" ]]; then
+        # Use fixed accent color (only when no image provided, e.g., pick_accent.sh)
+        matugen_args=(color hex "$color")
+        generate_colors_material_args=(--color "$color")
+    else
+        echo 'Aborted'
+        exit 0
     fi
 
     # Determine mode if not set
@@ -333,10 +353,6 @@ main() {
     }
     get_accent_color_from_config() {
         jq -r '.appearance.palette.accentColor' "$SHELL_CONFIG_FILE" 2>/dev/null || echo ""
-    }
-    set_accent_color() {
-        local color="$1"
-        jq --arg color "$color" '.appearance.palette.accentColor = $color' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
     }
 
     detect_scheme_type_from_image() {
