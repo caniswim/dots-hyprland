@@ -94,7 +94,7 @@ Singleton {
                         "description": "This is a custom model. Edit the config to add more! | Anyway, this is DeepSeek R1 Distill LLaMA 70B",
                         "endpoint": "https://openrouter.ai/api/v1/chat/completions",
                         "homepage": "https://openrouter.ai/deepseek/deepseek-r1-distill-llama-70b:free", // Not mandatory
-                        "icon": "spark-symbolic", // Not mandatory
+                        "icon": "apple-symbolic", // Not mandatory
                         "key_get_link": "https://openrouter.ai/settings/keys", // Not mandatory
                         "key_id": "openrouter",
                         "model": "deepseek/deepseek-r1-distill-llama-70b:free",
@@ -186,17 +186,7 @@ Singleton {
                             property bool useSineCookie: false
                         }
                         property JsonObject digital: JsonObject {
-                            property bool adaptiveAlignment: true
-                            property bool showDate: true
                             property bool animateChange: true
-                            property bool vertical: false
-                            property JsonObject font: JsonObject {
-                                property string family: "Google Sans Flex"
-                                property real weight: 350
-                                property real width: 100
-                                property real size: 90
-                                property real roundness: 0
-                            }
                         }
                         property JsonObject quote: JsonObject {
                             property bool enable: false
@@ -209,6 +199,11 @@ Singleton {
                         property real x: 400
                         property real y: 100
                     }
+                }
+                property JsonObject wallpaperEngine: JsonObject {
+                    property bool isActive: false
+                    property string workshopId: ""
+                    property string type: ""
                 }
                 property string wallpaperPath: ""
                 property string thumbnailPath: ""
@@ -237,7 +232,7 @@ Singleton {
                 property int cornerStyle: 0 // 0: Hug | 1: Float | 2: Plain rectangle
                 property bool floatStyleShadow: true // Show shadow behind bar when cornerStyle == 1 (Float)
                 property bool borderless: false // true for no grouping of items
-                property string topLeftIcon: "spark" // Options: "distro" or any icon name in ~/.config/quickshell/ii/assets/icons
+                property string topLeftIcon: "apple" // Options: "distro" or any icon name in ~/.config/quickshell/ii/assets/icons
                 property bool showBackground: true
                 property bool verbose: true
                 property bool vertical: false
@@ -414,9 +409,12 @@ Singleton {
                 property bool openingZoomAnimation: true
                 property bool darkenScreen: true
                 property real clickthroughOpacity: 0.8
-                property JsonObject floatingImage: JsonObject {
-                    property string imageSource: "https://media.tenor.com/H5U5bJzj3oAAAAAi/kukuru.gif"
-                    property real scale: 0.5
+                property JsonObject photoSlideshow: JsonObject {
+                    property string albumNames: "Noiva,Favorites" // Álbuns do iCloud (separados por vírgula)
+                    property int intervalSeconds: 180             // Intervalo entre fotos (3 min)
+                    property real opacity: 1.0                    // Opacidade do widget
+                    property int transitionDurationMs: 800        // Duração da transição
+                    property bool shuffle: true                   // Ordem aleatória
                 }
             }
 

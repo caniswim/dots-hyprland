@@ -15,6 +15,11 @@ MouseArea {
     property int columns: 4
     property real previewCellAspectRatio: 4 / 3
     property bool useDarkMode: Appearance.m3colors.darkmode
+    property bool showingWEWallpapers: false
+    property var filteredWEWallpapers: {
+        if (!root.showingWEWallpapers) return []
+        return WallpaperEngine.weWallpapers.filter(wp => !WallpaperEngine.ignoredWallpapers[wp.workshopId])
+    }
 
     function updateThumbnails() {
         const totalImageMargin = (Appearance.sizes.wallpaperSelectorItemMargins + Appearance.sizes.wallpaperSelectorItemPadding) * 2
@@ -164,13 +169,14 @@ MouseArea {
                         implicitWidth: 140
                         clip: true
                         model: [
-                            { icon: "home", name: "Home", path: Directories.home }, 
-                            { icon: "docs", name: "Documents", path: Directories.documents }, 
-                            { icon: "download", name: "Downloads", path: Directories.downloads }, 
-                            { icon: "image", name: "Pictures", path: Directories.pictures }, 
-                            { icon: "movie", name: "Videos", path: Directories.videos }, 
-                            { icon: "", name: "---", path: "INTENTIONALLY_INVALID_DIR" }, 
-                            { icon: "wallpaper", name: "Wallpapers", path: `${Directories.pictures}/Wallpapers` }, 
+                            { icon: "home", name: "Home", path: Directories.home },
+                            { icon: "docs", name: "Documents", path: Directories.documents },
+                            { icon: "download", name: "Downloads", path: Directories.downloads },
+                            { icon: "image", name: "Pictures", path: Directories.pictures },
+                            { icon: "movie", name: "Videos", path: Directories.videos },
+                            { icon: "", name: "---", path: "INTENTIONALLY_INVALID_DIR" },
+                            { icon: "wallpaper", name: "Wallpapers", path: `${Directories.pictures}/Wallpapers` },
+                            { icon: "videogame_asset", name: "Workshop", path: "WALLPAPER_ENGINE", isWE: true },
                             ...(Config.options.policies.weeb === 1 ? [{ icon: "favorite", name: "Homework", path: `${Directories.pictures}/homework` }] : []),
                         ]
                         delegate: RippleButton {
@@ -180,9 +186,17 @@ MouseArea {
                                 left: parent.left
                                 right: parent.right
                             }
-                            onClicked: Wallpapers.setDirectory(quickDirButton.modelData.path)
+                            onClicked: {
+                                if (quickDirButton.modelData.isWE) {
+                                    root.showingWEWallpapers = true
+                                    WallpaperEngine.load()
+                                } else {
+                                    root.showingWEWallpapers = false
+                                    Wallpapers.setDirectory(quickDirButton.modelData.path)
+                                }
+                            }
                             enabled: modelData.icon.length > 0
-                            toggled: Wallpapers.directory === Qt.resolvedUrl(modelData.path)
+                            toggled: (quickDirButton.modelData.isWE && root.showingWEWallpapers) || (!quickDirButton.modelData.isWE && Wallpapers.directory === Qt.resolvedUrl(modelData.path))
                             colBackgroundToggled: Appearance.colors.colSecondaryContainer
                             colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
                             colRippleToggled: Appearance.colors.colSecondaryContainerActive
@@ -250,7 +264,7 @@ MouseArea {
 
                     GridView {
                         id: grid
-                        visible: Wallpapers.folderModel.count > 0
+                        visible: root.showingWEWallpapers ? WallpaperEngine.weWallpapers.length > 0 : Wallpapers.folderModel.count > 0
 
                         readonly property int columns: root.columns
                         readonly property int rows: Math.max(1, Math.ceil(count / columns))
@@ -276,11 +290,17 @@ MouseArea {
                         }
 
                         function activateCurrent() {
-                            const filePath = grid.model.get(currentIndex, "filePath")
-                            root.selectWallpaperPath(filePath);
+                            if (root.showingWEWallpapers) {
+                                const wp = WallpaperEngine.weWallpapers[currentIndex]
+                                Wallpapers.applyWEWallpaper(wp.workshopId, root.useDarkMode)
+                                filterField.text = ""
+                            } else {
+                                const filePath = grid.model.get(currentIndex, "filePath")
+                                root.selectWallpaperPath(filePath);
+                            }
                         }
 
-                        model: Wallpapers.folderModel
+                        model: root.showingWEWallpapers ? root.filteredWEWallpapers : Wallpapers.folderModel
                         onModelChanged: currentIndex = 0
                         delegate: WallpaperDirectoryItem {
                             required property var modelData
@@ -294,9 +314,20 @@ MouseArea {
                             onEntered: {
                                 grid.currentIndex = index;
                             }
-                            
+
                             onActivated: {
-                                root.selectWallpaperPath(fileModelData.filePath);
+                                if (root.showingWEWallpapers) {
+                                    Wallpapers.applyWEWallpaper(fileModelData.workshopId, root.useDarkMode)
+                                    filterField.text = ""
+                                } else {
+                                    root.selectWallpaperPath(fileModelData.filePath);
+                                }
+                            }
+
+                            onRightClicked: {
+                                if (root.showingWEWallpapers && fileModelData.workshopId) {
+                                    WallpaperEngine.toggleIgnoreWallpaper(fileModelData.workshopId)
+                                }
                             }
                         }
 
@@ -338,11 +369,17 @@ MouseArea {
                         IconToolbarButton {
                             implicitWidth: height
                             onClicked: {
-                                Wallpapers.randomFromCurrentFolder();
+                                if (root.showingWEWallpapers) {
+                                    WallpaperEngine.randomWallpaper(root.useDarkMode);
+                                } else {
+                                    Wallpapers.randomFromCurrentFolder();
+                                }
                             }
                             text: "ifl"
                             StyledToolTip {
-                                text: Translation.tr("Pick random from this folder")
+                                text: root.showingWEWallpapers
+                                    ? Translation.tr("Pick random WE wallpaper")
+                                    : Translation.tr("Pick random from this folder")
                             }
                         }
 
@@ -352,6 +389,16 @@ MouseArea {
                             text: root.useDarkMode ? "dark_mode" : "light_mode"
                             StyledToolTip {
                                 text: Translation.tr("Click to toggle light/dark mode\n(applied when wallpaper is chosen)")
+                            }
+                        }
+
+                        IconToolbarButton {
+                            visible: root.showingWEWallpapers
+                            implicitWidth: height
+                            onClicked: WallpaperEngine.forceReindex()
+                            text: "refresh"
+                            StyledToolTip {
+                                text: Translation.tr("Refresh wallpaper list")
                             }
                         }
 
@@ -419,6 +466,14 @@ MouseArea {
         target: Wallpapers
         function onChanged() {
             GlobalStates.wallpaperSelectorOpen = false;
+        }
+    }
+
+    Connections {
+        target: WallpaperEngine
+        function onWallpapersLoaded() {
+            // Force update of filtered list when wallpapers or ignored list changes
+            root.filteredWEWallpapers = WallpaperEngine.weWallpapers.filter(wp => !WallpaperEngine.ignoredWallpapers[wp.workshopId])
         }
     }
 }

@@ -39,7 +39,22 @@ Singleton {
     Process {
         id: applyProc
     }
-    
+
+    // Wallpaper Engine process
+    Process {
+        id: weApplyProc
+    }
+
+    function applyWEWallpaper(workshopId, darkMode = Appearance.m3colors.darkmode) {
+        if (!workshopId || workshopId.length === 0) return
+        weApplyProc.exec([
+            Directories.weWallpaperScriptPath,
+            "--id", workshopId,
+            "--mode", (darkMode ? "dark" : "light")
+        ])
+        root.changed()
+    }
+
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode) {
         applyProc.exec([
             Directories.wallpaperSwitchScriptPath,
