@@ -10,7 +10,8 @@ MouseArea {
     id: root
     required property var fileModelData
     property bool isDirectory: fileModelData.fileIsDir
-    property bool useThumbnail: Images.isValidImageByName(fileModelData.fileName)
+    property bool isWEWallpaper: fileModelData.isWallpaperEngine || false
+    property bool useThumbnail: isWEWallpaper ? true : Images.isValidImageByName(fileModelData.fileName)
 
     property alias colBackground: background.color
     property alias colText: wallpaperItemName.color
@@ -21,9 +22,17 @@ MouseArea {
     padding: Appearance.sizes.wallpaperSelectorItemPadding
 
     signal activated()
+    signal rightClicked()
 
     hoverEnabled: true
-    onClicked: root.activated()
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
+    onClicked: mouse => {
+        if (mouse.button === Qt.RightButton) {
+            root.rightClicked()
+        } else {
+            root.activated()
+        }
+    }
 
     Rectangle {
         id: background
@@ -61,7 +70,7 @@ MouseArea {
                     sourceComponent: ThumbnailImage {
                         id: thumbnailImage
                         generateThumbnail: false
-                        sourcePath: fileModelData.filePath
+                        sourcePath: root.isWEWallpaper ? fileModelData.previewPath : fileModelData.filePath
 
                         cache: false
                         fillMode: Image.PreserveAspectCrop
@@ -73,7 +82,7 @@ MouseArea {
                             target: Wallpapers
                             function onThumbnailGenerated(directory) {
                                 if (thumbnailImage.status !== Image.Error) return;
-                                if (FileUtils.parentDirectory(thumbnailImage.sourcePath) !== FileUtils.trimFileProtocol(directory)) return;
+                                if (FileUtils.parentDirectory(thumbnailImage.sourcePath) !== directory) return;
                                 thumbnailImage.source = "";
                                 thumbnailImage.source = thumbnailImage.thumbnailPath;
                             }
@@ -92,6 +101,30 @@ MouseArea {
                                 height: wallpaperItemImageContainer.height
                                 radius: Appearance.rounding.small
                             }
+                        }
+                    }
+                }
+
+                // Badge for WE wallpaper type
+                Loader {
+                    id: typeBadgeLoader
+                    active: root.isWEWallpaper && thumbnailImageLoader.active
+                    anchors {
+                        top: parent.top
+                        right: parent.right
+                        margins: 8
+                    }
+                    sourceComponent: Rectangle {
+                        width: 32
+                        height: 32
+                        radius: 16
+                        color: Qt.rgba(0, 0, 0, 0.6)
+
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            iconSize: 20
+                            text: WallpaperEngine.getTypeIcon(fileModelData.type || "unknown")
+                            color: "white"
                         }
                     }
                 }
@@ -120,7 +153,7 @@ MouseArea {
                 Behavior on color {
                     animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
                 }
-                text: fileModelData.fileName
+                text: root.isWEWallpaper ? fileModelData.title : fileModelData.fileName
             }
         }
     }
