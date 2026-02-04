@@ -145,7 +145,18 @@ EOF
 set_wallpaper_path() {
     local path="$1"
     if [ -f "$SHELL_CONFIG_FILE" ]; then
-        jq --arg path "$path" '.background.wallpaperPath = $path' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
+        # Deactivate Wallpaper Engine and set the new wallpaper path
+        jq --arg path "$path" '
+            .background.wallpaperPath = $path |
+            .background.wallpaperEngine.isActive = false |
+            .background.wallpaperEngine.workshopId = "" |
+            .background.wallpaperEngine.type = ""
+        ' "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
+    fi
+
+    # Kill any running Wallpaper Engine processes
+    if pgrep -f linux-wallpaperengine > /dev/null 2>&1; then
+        pkill -f -9 linux-wallpaperengine 2>/dev/null || true
     fi
 }
 
