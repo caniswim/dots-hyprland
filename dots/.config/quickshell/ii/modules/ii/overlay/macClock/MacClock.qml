@@ -31,6 +31,27 @@ Item {
         return date.getSeconds()
     }
 
+    // Sync: when this widget is resized, update shared size
+    Connections {
+        target: root.persistentState
+        function onWidthChanged() {
+            if (Math.abs(root.persistentState.width - Persistent.states.overlay.sharedMacWidgetSize) > 1) {
+                Persistent.states.overlay.sharedMacWidgetSize = root.persistentState.width
+            }
+        }
+    }
+
+    // Sync: when shared size changes (other widget resized), update our size
+    Connections {
+        target: Persistent.states.overlay
+        function onSharedMacWidgetSizeChanged() {
+            if (Math.abs(root.persistentState.width - Persistent.states.overlay.sharedMacWidgetSize) > 1) {
+                root.persistentState.width = Persistent.states.overlay.sharedMacWidgetSize
+                root.persistentState.height = Persistent.states.overlay.sharedMacWidgetSize
+            }
+        }
+    }
+
     Timer {
         interval: 1000
         running: true
