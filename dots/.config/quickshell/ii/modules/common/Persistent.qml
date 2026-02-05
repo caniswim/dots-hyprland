@@ -85,6 +85,8 @@ Singleton {
 
             property JsonObject overlay: JsonObject {
                 property list<string> open: ["crosshair", "recorder", "volumeMixer", "resources"]
+                // Shared size for mac-style widgets (MacClock, MacCalendar)
+                property real sharedMacWidgetSize: 160
                 property JsonObject crosshair: JsonObject {
                     property bool pinned: false
                     property bool clickthrough: true

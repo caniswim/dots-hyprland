@@ -18,6 +18,7 @@ Item {
 
     readonly property var persistentState: Persistent.states.overlay.macCalendar
     readonly property bool isPinned: persistentState.pinned
+    readonly property real sharedSize: Persistent.states.overlay.sharedMacWidgetSize
 
     readonly property real minWidgetSize: 120
     readonly property real maxWidgetSize: 300
@@ -45,8 +46,8 @@ Item {
         persistentState.x = Math.round(x)
         persistentState.y = Math.round(y)
         const size = Math.max(w, h)
-        persistentState.width = Math.round(size)
-        persistentState.height = Math.round(size)
+        // Save to shared state so MacClock syncs
+        Persistent.states.overlay.sharedMacWidgetSize = Math.round(size)
     }
 
     // OVERLAY WIDGET
@@ -67,7 +68,7 @@ Item {
 
         contentItem: CalendarContent {
             property real size: Math.min(
-                Math.max(root.persistentState.width, root.minWidgetSize),
+                Math.max(root.sharedSize, root.minWidgetSize),
                 root.maxWidgetSize
             )
             widgetSize: size
@@ -92,7 +93,7 @@ Item {
         }
 
         property real widgetSize: Math.min(
-            Math.max(root.persistentState.width, root.minWidgetSize),
+            Math.max(root.sharedSize, root.minWidgetSize),
             root.maxWidgetSize
         )
 
