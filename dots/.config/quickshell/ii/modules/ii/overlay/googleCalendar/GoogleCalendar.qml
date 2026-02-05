@@ -76,7 +76,7 @@ Item {
         id: gcalcliProcess
         property var buffer: []
 
-        command: ["gcalcli", "agenda", "--nocolor", "--tsv", "today", "+" + root.daysAhead + " days"]
+        command: ["gcalcli", "agenda", "--nocolor", "--tsv", "--details", "all", "today", "+" + root.daysAhead + " days"]
         running: false
         stdout: SplitParser {
             onRead: data => {
@@ -116,18 +116,22 @@ Item {
         const parsedEvents = []
         const byDate = {}
 
-        for (let i = 0; i < lines.length; i++) {
+        // Skip header line (first line with --details all)
+        for (let i = 1; i < lines.length; i++) {
             const line = lines[i]
             const parts = line.split('\t')
 
-            // TSV format: date, start_time, end_time, link, title, location, description
-            if (parts.length >= 5) {
-                const dateStr = parts[0]
-                const startTime = parts[1]
-                const endTime = parts[2]
-                const link = parts[3] || ""
-                const title = parts[4] || ""
-                const location = parts.length > 5 ? parts[5] : ""
+            // TSV format with --details all:
+            // [0]=id, [1]=start_date, [2]=start_time, [3]=end_date, [4]=end_time,
+            // [5]=html_link, [6]=hangout_link, [7]=conference_type, [8]=conference_uri,
+            // [9]=title, [10]=location, [11]=description
+            if (parts.length >= 10) {
+                const dateStr = parts[1]
+                const startTime = parts[2]
+                const endTime = parts[4]
+                const link = parts[5] || ""
+                const title = parts[9] || ""
+                const location = parts.length > 10 ? parts[10] : ""
 
                 // Parse date (YYYY-MM-DD format)
                 const dateParts = dateStr.split('-')
@@ -638,13 +642,26 @@ Item {
                                 anchors.leftMargin: 4 * content.scaleFactor
                                 spacing: 8 * content.scaleFactor
 
-                                // Time
-                                Text {
+                                // Time (start and end)
+                                ColumnLayout {
                                     Layout.preferredWidth: 45 * content.scaleFactor
-                                    text: eventDelegate.modelData.startTime || ""
-                                    font.family: Appearance.font.family.numbers
-                                    font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * content.scaleFactor)
-                                    color: Appearance.colors.colOnSurfaceVariant
+                                    Layout.alignment: Qt.AlignTop
+                                    spacing: 0
+
+                                    Text {
+                                        text: eventDelegate.modelData.startTime || ""
+                                        font.family: Appearance.font.family.numbers
+                                        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * content.scaleFactor)
+                                        color: Appearance.colors.colOnSurface
+                                    }
+
+                                    Text {
+                                        text: eventDelegate.modelData.endTime || ""
+                                        font.family: Appearance.font.family.numbers
+                                        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * content.scaleFactor)
+                                        color: Appearance.colors.colOnSurfaceVariant
+                                        visible: text.length > 0
+                                    }
                                 }
 
                                 // Color bar
