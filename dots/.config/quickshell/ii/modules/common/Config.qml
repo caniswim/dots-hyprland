@@ -420,6 +420,7 @@ Singleton {
                     property int refreshIntervalMinutes: 5        // Intervalo de refresh (minutos)
                     property int daysAhead: 7                     // Dias à frente para buscar eventos
                     property string googleCalendarUrl: "https://calendar.google.com"
+                    property bool tasksEnabled: true              // Habilitar Google Tasks
                 }
             }
 

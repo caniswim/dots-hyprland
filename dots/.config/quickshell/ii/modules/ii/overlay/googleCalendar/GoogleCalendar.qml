@@ -24,11 +24,15 @@ Item {
     readonly property int refreshIntervalMs: Config.options.overlay.googleCalendar.refreshIntervalMinutes * 60 * 1000
     readonly property int daysAhead: Config.options.overlay.googleCalendar.daysAhead
     readonly property string googleCalendarUrl: Config.options.overlay.googleCalendar.googleCalendarUrl
+    readonly property bool tasksEnabled: Config.options.overlay.googleCalendar.tasksEnabled
 
     // State
     property var events: []
+    property var tasks: []
+    property var combinedItems: []
     property var eventsByDate: ({})
     property bool loading: true
+    property bool tasksLoading: false
     property bool hasError: false
     property string errorMessage: ""
 
@@ -39,7 +43,7 @@ Item {
         OverlayContext.pin(identifier, isPinned)
     }
     Component.onCompleted: {
-        fetchEvents()
+        fetchAll()
         if (isPinned) OverlayContext.pin(identifier, true)
     }
     Component.onDestruction: {
@@ -51,7 +55,7 @@ Item {
         interval: root.refreshIntervalMs
         running: true
         repeat: true
-        onTriggered: root.fetchEvents()
+        onTriggered: root.fetchAll()
     }
 
     // Timer for updating current date at midnight
@@ -66,7 +70,7 @@ Item {
         repeat: false
         onTriggered: {
             root.currentDate = new Date()
-            root.fetchEvents()
+            root.fetchAll()
             midnightTimer.restart()
         }
     }
@@ -103,7 +107,54 @@ Item {
             }
             gcalcliProcess.buffer = []
             root.loading = false
+            root.mergeEventsAndTasks()
         }
+    }
+
+    // Process for gtasks-cli (Google Tasks CLI)
+    Process {
+        id: gtasksProcess
+        property string buffer: ""
+
+        command: [Directories.home + "/.local/bin/gtasks-cli", "list"]
+        running: false
+        stdout: SplitParser {
+            onRead: data => {
+                gtasksProcess.buffer += data
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0) {
+                root.parseTasks(gtasksProcess.buffer)
+            } else {
+                // Silently fail for tasks - don't show error if gtasks-cli not installed
+                root.tasks = []
+            }
+            gtasksProcess.buffer = ""
+            root.tasksLoading = false
+            root.mergeEventsAndTasks()
+        }
+    }
+
+    // Process for completing a task
+    Process {
+        id: completeTaskProcess
+        property string taskId: ""
+        command: [Directories.home + "/.local/bin/gtasks-cli", "done", taskId]
+        onExited: root.fetchTasks()
+    }
+
+    function fetchAll() {
+        fetchEvents()
+        if (root.tasksEnabled) {
+            fetchTasks()
+        }
+    }
+
+    function fetchTasks() {
+        root.tasksLoading = true
+        gtasksProcess.buffer = []
+        gtasksProcess.running = true
     }
 
     function fetchEvents() {
@@ -167,6 +218,159 @@ Item {
         root.eventsByDate = byDate
     }
 
+    function parseTasks(jsonStr: string) {
+        const parsedTasks = []
+
+        // Calculate date range: today to today + daysAhead
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const maxDate = new Date(today)
+        maxDate.setDate(maxDate.getDate() + root.daysAhead)
+
+        try {
+            const tasksData = JSON.parse(jsonStr)
+            for (let i = 0; i < tasksData.length; i++) {
+                const t = tasksData[i]
+                if (t.due && t.status !== "completed") {
+                    // Parse due date and filter by range
+                    const dueParts = t.due.split('-')
+                    if (dueParts.length === 3) {
+                        const dueDate = new Date(
+                            parseInt(dueParts[0]),
+                            parseInt(dueParts[1]) - 1,
+                            parseInt(dueParts[2])
+                        )
+                        dueDate.setHours(0, 0, 0, 0)
+
+                        // Only include tasks within the date range
+                        if (dueDate >= today && dueDate <= maxDate) {
+                            const task = {
+                                type: "task",
+                                title: t.title || "",
+                                dateStr: t.due,
+                                completed: t.status === "completed",
+                                taskId: t.tasklist_id + ":" + t.id
+                            }
+                            parsedTasks.push(task)
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.log("Failed to parse tasks JSON:", e)
+        }
+        root.tasks = parsedTasks
+    }
+
+    function mergeEventsAndTasks() {
+        // Only merge if both calendar and tasks have finished loading
+        if (root.loading || root.tasksLoading) {
+            return
+        }
+
+        const combined = []
+        const byDate = {}
+
+        // Add events with type marker
+        for (const event of root.events) {
+            const item = {
+                type: "event",
+                date: event.date,
+                dateStr: event.dateStr,
+                startTime: event.startTime,
+                endTime: event.endTime,
+                title: event.title,
+                location: event.location,
+                link: event.link,
+                completed: false,
+                taskId: ""
+            }
+            combined.push(item)
+
+            // Group by date
+            if (!byDate[event.dateStr]) {
+                byDate[event.dateStr] = []
+            }
+            byDate[event.dateStr].push(item)
+        }
+
+        // Add tasks
+        for (const task of root.tasks) {
+            if (task.completed) continue // Skip completed tasks
+
+            const dateParts = task.dateStr.split('-')
+            if (dateParts.length === 3) {
+                const taskDate = new Date(
+                    parseInt(dateParts[0]),
+                    parseInt(dateParts[1]) - 1,
+                    parseInt(dateParts[2])
+                )
+
+                const item = {
+                    type: "task",
+                    date: taskDate,
+                    dateStr: task.dateStr,
+                    title: task.title,
+                    startTime: "",
+                    endTime: "",
+                    location: "",
+                    link: "",
+                    completed: task.completed,
+                    taskId: task.taskId
+                }
+                combined.push(item)
+
+                // Group by date
+                if (!byDate[task.dateStr]) {
+                    byDate[task.dateStr] = []
+                }
+                byDate[task.dateStr].push(item)
+            }
+        }
+
+        // Sort combined items by date, then events before tasks, then by startTime
+        combined.sort((a, b) => {
+            // First: sort by date
+            if (a.dateStr !== b.dateStr) {
+                return a.dateStr.localeCompare(b.dateStr)
+            }
+            // Same date: events always before tasks
+            if (a.type !== b.type) {
+                return a.type === "event" ? -1 : 1
+            }
+            // Both are events: sort by startTime
+            if (a.type === "event" && a.startTime && b.startTime) {
+                return a.startTime.localeCompare(b.startTime)
+            }
+            return 0
+        })
+
+        // Sort items within each date group using Object.keys
+        const dateKeys = Object.keys(byDate)
+        for (let i = 0; i < dateKeys.length; i++) {
+            const dateStr = dateKeys[i]
+            byDate[dateStr].sort((a, b) => {
+                // Events always before tasks
+                if (a.type !== b.type) {
+                    return a.type === "event" ? -1 : 1
+                }
+                // Both are events: sort by startTime
+                if (a.type === "event" && a.startTime && b.startTime) {
+                    return a.startTime.localeCompare(b.startTime)
+                }
+                return 0
+            })
+        }
+
+        root.combinedItems = combined
+        root.eventsByDate = byDate
+    }
+
+    function toggleTaskComplete(taskId: string) {
+        completeTaskProcess.taskId = taskId
+        completeTaskProcess.running = true
+    }
+
     function hasEventsOnDate(date: date): bool {
         const dateStr = formatDateKey(date)
         return root.eventsByDate[dateStr] !== undefined && root.eventsByDate[dateStr].length > 0
@@ -219,13 +423,14 @@ Item {
             widgetWidth: Math.max(400, root.persistentState.width)
             widgetHeight: Math.max(250, root.persistentState.height)
             currentDate: root.currentDate
-            events: root.events
+            events: root.combinedItems
             eventsByDate: root.eventsByDate
-            loading: root.loading
+            loading: root.loading || root.tasksLoading
             hasError: root.hasError
             errorMessage: root.errorMessage
             hasEventsOnDate: root.hasEventsOnDate
             onOpenCalendar: root.openGoogleCalendar()
+            onToggleTask: (taskId) => root.toggleTaskComplete(taskId)
         }
     }
 
@@ -267,14 +472,15 @@ Item {
                 widgetWidth: backgroundWindow.widgetWidth
                 widgetHeight: backgroundWindow.widgetHeight
                 currentDate: root.currentDate
-                events: root.events
+                events: root.combinedItems
                 eventsByDate: root.eventsByDate
-                loading: root.loading
+                loading: root.loading || root.tasksLoading
                 hasError: root.hasError
                 errorMessage: root.errorMessage
                 hasEventsOnDate: root.hasEventsOnDate
                 radius: Appearance.rounding.windowRounding
                 onOpenCalendar: root.openGoogleCalendar()
+                onToggleTask: (taskId) => root.toggleTaskComplete(taskId)
             }
         }
     }
@@ -304,6 +510,7 @@ Item {
         implicitHeight: widgetHeight
 
         signal openCalendar()
+        signal toggleTask(string taskId)
 
         Rectangle {
             id: bg
@@ -642,36 +849,21 @@ Item {
                                 anchors.leftMargin: 4 * content.scaleFactor
                                 spacing: 8 * content.scaleFactor
 
-                                // Time (start and end)
-                                ColumnLayout {
+                                // Time (for events) or Checkbox (for tasks)
+                                Loader {
                                     Layout.preferredWidth: 45 * content.scaleFactor
                                     Layout.alignment: Qt.AlignTop
-                                    spacing: 0
-
-                                    Text {
-                                        text: eventDelegate.modelData.startTime || ""
-                                        font.family: Appearance.font.family.numbers
-                                        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * content.scaleFactor)
-                                        color: Appearance.colors.colOnSurface
-                                    }
-
-                                    Text {
-                                        text: eventDelegate.modelData.endTime || ""
-                                        font.family: Appearance.font.family.numbers
-                                        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * content.scaleFactor)
-                                        color: Appearance.colors.colOnSurfaceVariant
-                                        visible: text.length > 0
-                                    }
+                                    sourceComponent: eventDelegate.modelData.type === "task" ? taskCheckboxComponent : eventTimeComponent
                                 }
 
-                                // Color bar
+                                // Color bar - different color for tasks
                                 Rectangle {
                                     Layout.preferredWidth: 3 * content.scaleFactor
                                     Layout.fillHeight: true
                                     Layout.topMargin: 2 * content.scaleFactor
                                     Layout.bottomMargin: 2 * content.scaleFactor
                                     radius: 1.5 * content.scaleFactor
-                                    color: Appearance.colors.colPrimary
+                                    color: eventDelegate.modelData.type === "task" ? Appearance.colors.colSecondary : Appearance.colors.colPrimary
                                 }
 
                                 // Event details
@@ -699,8 +891,94 @@ Item {
                                     }
                                 }
                             }
+
+                            // Component for event time display
+                            Component {
+                                id: eventTimeComponent
+                                ColumnLayout {
+                                    spacing: 0
+
+                                    Text {
+                                        text: eventDelegate.modelData.startTime || ""
+                                        font.family: Appearance.font.family.numbers
+                                        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * content.scaleFactor)
+                                        color: Appearance.colors.colOnSurface
+                                    }
+
+                                    Text {
+                                        text: eventDelegate.modelData.endTime || ""
+                                        font.family: Appearance.font.family.numbers
+                                        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * content.scaleFactor)
+                                        color: Appearance.colors.colOnSurfaceVariant
+                                        visible: text.length > 0
+                                    }
+                                }
+                            }
+
+                            // Component for task checkbox display
+                            Component {
+                                id: taskCheckboxComponent
+                                Item {
+                                    width: 45 * content.scaleFactor
+                                    height: 24 * content.scaleFactor
+
+                                    Rectangle {
+                                        id: checkbox
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.left: parent.left
+                                        width: 18 * content.scaleFactor
+                                        height: 18 * content.scaleFactor
+                                        radius: 4 * content.scaleFactor
+                                        color: "transparent"
+                                        border.color: Appearance.colors.colSecondary
+                                        border.width: 1.5 * content.scaleFactor
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: eventDelegate.modelData.completed ? "\u2713" : ""
+                                            font.pixelSize: Math.round(12 * content.scaleFactor)
+                                            font.weight: Font.Bold
+                                            color: Appearance.colors.colSecondary
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: content.toggleTask(eventDelegate.modelData.taskId)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
+                }
+            }
+
+            // Add Task button (bottom right corner)
+            Rectangle {
+                id: addTaskButton
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: 12 * content.scaleFactor
+                width: 32 * content.scaleFactor
+                height: 32 * content.scaleFactor
+                radius: width / 2
+                color: addTaskMouseArea.containsMouse ? Qt.lighter(Appearance.colors.colSecondary, 1.2) : Appearance.colors.colSecondary
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "+"
+                    font.pixelSize: Math.round(20 * content.scaleFactor)
+                    font.weight: Font.Medium
+                    color: Appearance.colors.colOnSecondary
+                }
+
+                MouseArea {
+                    id: addTaskMouseArea
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: Qt.openUrlExternally("https://tasks.google.com")
                 }
             }
         }
