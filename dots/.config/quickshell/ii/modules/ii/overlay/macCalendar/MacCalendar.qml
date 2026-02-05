@@ -24,7 +24,7 @@ Item {
     readonly property real maxWidgetSize: 300
     readonly property real widgetRadius: 28
 
-    // Sync: when this widget is resized, update shared size
+    // Sync: when this widget is resized/moved, update shared state
     Connections {
         target: root.persistentState
         function onWidthChanged() {
@@ -32,15 +32,25 @@ Item {
                 Persistent.states.overlay.sharedMacWidgetSize = root.persistentState.width
             }
         }
+        function onYChanged() {
+            if (Math.abs(root.persistentState.y - Persistent.states.overlay.sharedMacWidgetY) > 1) {
+                Persistent.states.overlay.sharedMacWidgetY = root.persistentState.y
+            }
+        }
     }
 
-    // Sync: when shared size changes (other widget resized), update our size
+    // Sync: when shared state changes (other widget changed), update ours
     Connections {
         target: Persistent.states.overlay
         function onSharedMacWidgetSizeChanged() {
             if (Math.abs(root.persistentState.width - Persistent.states.overlay.sharedMacWidgetSize) > 1) {
                 root.persistentState.width = Persistent.states.overlay.sharedMacWidgetSize
                 root.persistentState.height = Persistent.states.overlay.sharedMacWidgetSize
+            }
+        }
+        function onSharedMacWidgetYChanged() {
+            if (Math.abs(root.persistentState.y - Persistent.states.overlay.sharedMacWidgetY) > 1) {
+                root.persistentState.y = Persistent.states.overlay.sharedMacWidgetY
             }
         }
     }
