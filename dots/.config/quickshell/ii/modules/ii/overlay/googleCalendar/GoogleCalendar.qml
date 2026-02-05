@@ -324,7 +324,7 @@ Item {
                 Item {
                     id: calendarContainer
                     Layout.fillHeight: true
-                    Layout.preferredWidth: 200 * content.scaleFactor
+                    Layout.preferredWidth: 240 * content.scaleFactor
 
                     // Responsive cell size based on widget scaleFactor
                     readonly property real cellSpacing: 2 * content.scaleFactor
@@ -661,7 +661,7 @@ Item {
                                         Layout.fillWidth: true
                                         text: eventDelegate.modelData.title || ""
                                         font.family: Appearance.font.family.main
-                                        font.pixelSize: Math.round(Appearance.font.pixelSize.small * content.scaleFactor)
+                                        font.pixelSize: Math.round(Appearance.font.pixelSize.small * content.scaleFactor) + 1
                                         color: Appearance.colors.colOnSurface
                                         elide: Text.ElideRight
                                     }
