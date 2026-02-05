@@ -416,6 +416,11 @@ Singleton {
                     property int transitionDurationMs: 800        // Duração da transição
                     property bool shuffle: true                   // Ordem aleatória
                 }
+                property JsonObject googleCalendar: JsonObject {
+                    property int refreshIntervalMinutes: 15       // Intervalo de refresh (minutos)
+                    property int daysAhead: 7                     // Dias à frente para buscar eventos
+                    property string googleCalendarUrl: "https://calendar.google.com"
+                }
             }
 
             property JsonObject overview: JsonObject {

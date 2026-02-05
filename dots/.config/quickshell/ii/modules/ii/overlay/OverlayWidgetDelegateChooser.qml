@@ -10,6 +10,7 @@ import qs.modules.ii.overlay.crosshair
 import qs.modules.ii.overlay.volumeMixer
 import qs.modules.ii.overlay.photoSlideshow
 import qs.modules.ii.overlay.fpsLimiter
+import qs.modules.ii.overlay.googleCalendar
 import qs.modules.ii.overlay.macClock
 import qs.modules.ii.overlay.macCalendar
 import qs.modules.ii.overlay.recorder
@@ -22,6 +23,7 @@ DelegateChooser {
 
     DelegateChoice { roleValue: "crosshair"; Crosshair {} }
     DelegateChoice { roleValue: "fpsLimiter"; FpsLimiter {} }
+    DelegateChoice { roleValue: "googleCalendar"; GoogleCalendar {} }
     DelegateChoice { roleValue: "macClock"; MacClock {} }
     DelegateChoice { roleValue: "macCalendar"; MacCalendar {} }
     DelegateChoice { roleValue: "notes"; Notes {} }

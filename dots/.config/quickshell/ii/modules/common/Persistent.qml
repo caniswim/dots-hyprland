@@ -159,6 +159,14 @@ Singleton {
                     property real width: 460
                     property real height: 330
                 }
+                property JsonObject googleCalendar: JsonObject {
+                    property bool pinned: false
+                    property bool clickthrough: true
+                    property real x: 500
+                    property real y: 100
+                    property real width: 500
+                    property real height: 300
+                }
             }
 
             property JsonObject timer: JsonObject {

@@ -8,6 +8,7 @@ Singleton {
     readonly property list<var> availableWidgets: [
         { identifier: "crosshair", materialSymbol: "point_scan" },
         { identifier: "fpsLimiter", materialSymbol: "animation" },
+        { identifier: "googleCalendar", materialSymbol: "event" },
         { identifier: "macClock", materialSymbol: "schedule" },
         { identifier: "macCalendar", materialSymbol: "calendar_today" },
         { identifier: "photoSlideshow", materialSymbol: "photo_library" },
