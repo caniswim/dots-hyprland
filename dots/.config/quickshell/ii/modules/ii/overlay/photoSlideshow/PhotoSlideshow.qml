@@ -283,7 +283,7 @@ Item {
     function openInViewer() {
         if (imageFiles.length === 0) return
         const filepath = imageFiles[currentIndex]
-        imageViewerProcess.command = ["xdg-open", filepath]
+        imageViewerProcess.command = ["qimgv", filepath]
         imageViewerProcess.running = true
     }
 
