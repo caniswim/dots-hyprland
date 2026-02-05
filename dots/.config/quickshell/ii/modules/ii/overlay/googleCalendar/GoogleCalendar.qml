@@ -515,10 +515,10 @@ Item {
         Rectangle {
             id: bg
             anchors.fill: parent
-            color: Appearance.colors.colLayer0
+            color: ColorUtils.transparentize(Appearance.colors.colLayer0, Config.options.overlay.widgetTransparency)
             radius: content.radius
             border.width: 1
-            border.color: Appearance.colors.colLayer0Border
+            border.color: ColorUtils.transparentize(Appearance.colors.colLayer0Border, Config.options.overlay.widgetTransparency)
 
             MouseArea {
                 anchors.fill: parent

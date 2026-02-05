@@ -199,9 +199,9 @@ Item {
             id: bg
             anchors.fill: parent
             radius: content.widgetRadius
-            color: Appearance.colors.colLayer0
+            color: ColorUtils.transparentize(Appearance.colors.colLayer0, Config.options.overlay.widgetTransparency)
             border.width: 1
-            border.color: Appearance.colors.colLayer0Border
+            border.color: ColorUtils.transparentize(Appearance.colors.colLayer0Border, Config.options.overlay.widgetTransparency)
 
             layer.enabled: true
             layer.effect: OpacityMask {

@@ -409,6 +409,7 @@ Singleton {
                 property bool openingZoomAnimation: true
                 property bool darkenScreen: true
                 property real clickthroughOpacity: 0.8
+                property real widgetTransparency: 0.1       // Transparência dos widgets (0 = opaco, 1 = transparente)
                 property JsonObject photoSlideshow: JsonObject {
                     property string albumNames: "Noiva,Favorites" // Álbuns do iCloud (separados por vírgula)
                     property int intervalSeconds: 180             // Intervalo entre fotos (3 min)
