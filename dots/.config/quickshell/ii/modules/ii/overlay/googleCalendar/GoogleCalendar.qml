@@ -326,17 +326,25 @@ Item {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 240 * content.scaleFactor
 
-                    // Responsive cell size based on widget scaleFactor
-                    readonly property real cellSpacing: 2 * content.scaleFactor
-                    readonly property real cellSize: 28 * content.scaleFactor
+                    // Responsive cell size based on available space
+                    readonly property real cellSpacing: 1 * content.scaleFactor
+                    readonly property real headerHeight: monthHeader.implicitHeight + columnLayout.spacing
+                    readonly property real availableHeight: height - headerHeight - (columnLayout.spacing * 2)
+                    readonly property real cellSizeFromHeight: (availableHeight / 6.6) - cellSpacing  // 6 semanas + header dias
+                    readonly property real cellSizeFromWidth: (width - 6 * cellSpacing) / 7           // 7 dias - 6 espaçamentos
+                    readonly property real cellSize: Math.max(20, Math.min(cellSizeFromHeight, cellSizeFromWidth))
 
                     ColumnLayout {
+                        id: columnLayout
                         anchors.fill: parent
-                        spacing: 4 * content.scaleFactor
+                        spacing: 2 * content.scaleFactor
 
                         // Month/Year header
                         Text {
-                            text: content.currentDate.toLocaleDateString(Qt.locale(), "MMMM yyyy")
+                            id: monthHeader
+                            readonly property real gridWidth: 7 * calendarContainer.cellSize + 6 * calendarContainer.cellSpacing
+                            Layout.leftMargin: (calendarContainer.width - gridWidth) / 2 + 6 * content.scaleFactor
+                            text: content.currentDate.toLocaleDateString(Qt.locale("en_US"), "MMMM yyyy")
                             font.family: Appearance.font.family.main
                             font.pixelSize: Math.round(Appearance.font.pixelSize.normal * content.scaleFactor)
                             font.weight: Font.DemiBold
@@ -354,7 +362,7 @@ Item {
                                 Item {
                                     required property var modelData
                                     width: calendarContainer.cellSize
-                                    height: calendarContainer.cellSize * 0.7
+                                    height: calendarContainer.cellSize * 0.6
 
                                     Text {
                                         anchors.centerIn: parent
@@ -438,9 +446,6 @@ Item {
                                 }
                             }
                         }
-
-                        // Spacer to push content up
-                        Item { Layout.fillHeight: true }
                     }
                 }
 
