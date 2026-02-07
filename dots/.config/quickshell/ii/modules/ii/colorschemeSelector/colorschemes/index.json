@@ -1,0 +1,12 @@
+{
+  "schemes": [
+    { "id": "gruvbox-dark", "file": "gruvbox-dark.json" },
+    { "id": "gruvbox-light", "file": "gruvbox-light.json" },
+    { "id": "catppuccin-mocha", "file": "catppuccin-mocha.json" },
+    { "id": "catppuccin-latte", "file": "catppuccin-latte.json" },
+    { "id": "tokyo-night", "file": "tokyo-night.json" },
+    { "id": "tokyo-night-light", "file": "tokyo-night-light.json" },
+    { "id": "nord", "file": "nord.json" },
+    { "id": "nord-light", "file": "nord-light.json" }
+  ]
+}

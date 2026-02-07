@@ -1,0 +1,4 @@
+module qs.modules.ii.colorschemeSelector
+ColorschemeSelector 1.0 ColorschemeSelector.qml
+ColorschemeSelectorContent 1.0 ColorschemeSelectorContent.qml
+ColorschemeItem 1.0 ColorschemeItem.qml
