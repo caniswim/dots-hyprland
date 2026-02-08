@@ -3,6 +3,13 @@
   "name": "Nord Light",
   "author": "Arctic Ice Studio",
   "darkMode": false,
+  "theme": {
+    "gtkTheme": "adw-gtk3",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Nordzy",
+    "papirusFolderColor": "",
+    "colorScheme": "prefer-light"
+  },
   "colors": {
     "m3primary": "#5e81ac",
     "m3onPrimary": "#eceff4",

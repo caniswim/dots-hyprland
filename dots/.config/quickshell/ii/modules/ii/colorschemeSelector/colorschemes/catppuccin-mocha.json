@@ -3,6 +3,13 @@
   "name": "Catppuccin Mocha",
   "author": "Catppuccin",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Catppuccin-Mocha-Dark",
+    "kvantumTheme": "catppuccin-mocha-mauve",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "cat-mocha-mauve",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#cba6f7",
     "m3onPrimary": "#1e1e2e",

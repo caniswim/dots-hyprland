@@ -3,6 +3,13 @@
   "name": "Solarized Dark",
   "author": "Ethan Schoonover",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "teal",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#268bd2",
     "m3onPrimary": "#002b36",

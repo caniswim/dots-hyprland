@@ -11,6 +11,7 @@ Singleton {
     id: root
 
     readonly property string schemesPath: "/home/brunno/.config/quickshell/ii/modules/ii/colorschemeSelector/colorschemes"
+    readonly property string scriptsPath: "/home/brunno/.config/quickshell/ii/scripts/themes"
     property alias schemes: schemesModel
     property var schemesData: []  // Raw data for lookup
     property string currentScheme: ""
@@ -76,13 +77,40 @@ Singleton {
                         schemeId: s.id,
                         schemeName: s.name,
                         darkMode: s.darkMode,
-                        colorsJson: JSON.stringify(s.colors)
+                        colorsJson: JSON.stringify(s.colors),
+                        themeJson: s.theme ? JSON.stringify(s.theme) : ""
                     })
                 }
                 console.log("[Colorschemes] Loaded", schemesModel.count, "schemes into ListModel")
                 root.schemesLoaded()
             }
         }
+    }
+
+    Process {
+        id: applyThemeProc
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn("[Colorschemes] apply-system-theme.sh exited with code", exitCode)
+            }
+        }
+    }
+
+    function applySystemTheme(scheme) {
+        if (!scheme || !scheme.theme) return
+
+        const t = scheme.theme
+        const args = [
+            "bash", root.scriptsPath + "/apply-system-theme.sh",
+            "--gtk-theme", t.gtkTheme || "",
+            "--kvantum-theme", t.kvantumTheme || "",
+            "--icon-theme", t.iconTheme || "",
+            "--papirus-color", t.papirusFolderColor || "",
+            "--color-scheme", t.colorScheme || "",
+            "--scheme-id", scheme.id || ""
+        ]
+        applyThemeProc.command = args
+        applyThemeProc.running = true
     }
 
     function getScheme(schemeId) {
@@ -111,6 +139,7 @@ Singleton {
         Appearance.m3colors.darkmode = scheme.darkMode
 
         root.currentScheme = schemeId
+        applySystemTheme(scheme)
         root.schemeApplied(schemeId)
     }
 

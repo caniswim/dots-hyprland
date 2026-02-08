@@ -3,6 +3,13 @@
   "name": "Ayu Mirage",
   "author": "Ike Ku",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "blue",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#ffcc66",
     "m3onPrimary": "#1f2430",

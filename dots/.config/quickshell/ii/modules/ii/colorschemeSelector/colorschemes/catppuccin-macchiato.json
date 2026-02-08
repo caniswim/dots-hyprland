@@ -3,6 +3,13 @@
   "name": "Catppuccin Macchiato",
   "author": "Catppuccin",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Catppuccin-Macchiato-Dark-Macchiato",
+    "kvantumTheme": "catppuccin-macchiato-mauve",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "cat-macchiato-mauve",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#c6a0f6",
     "m3onPrimary": "#24273a",

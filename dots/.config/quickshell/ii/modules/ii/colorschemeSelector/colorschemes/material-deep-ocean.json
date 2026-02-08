@@ -3,6 +3,13 @@
   "name": "Material Deep Ocean",
   "author": "Mattia Astorino",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Material-Dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "blue",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#82aaff",
     "m3onPrimary": "#0f111a",

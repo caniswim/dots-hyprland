@@ -3,6 +3,13 @@
   "name": "Nord Deep",
   "author": "Arctic Ice Studio",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Nordic-darker",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Nordzy-dark",
+    "papirusFolderColor": "",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#88c0d0",
     "m3onPrimary": "#1a1e24",

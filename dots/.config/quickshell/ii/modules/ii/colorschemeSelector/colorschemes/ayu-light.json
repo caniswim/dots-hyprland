@@ -3,6 +3,13 @@
   "name": "Ayu Light",
   "author": "Ike Ku",
   "darkMode": false,
+  "theme": {
+    "gtkTheme": "adw-gtk3",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus",
+    "papirusFolderColor": "paleorange",
+    "colorScheme": "prefer-light"
+  },
   "colors": {
     "m3primary": "#f29718",
     "m3onPrimary": "#fcfcfc",

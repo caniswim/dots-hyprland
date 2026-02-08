@@ -3,6 +3,13 @@
   "name": "Ayu Dark",
   "author": "Ike Ku",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "orange",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#e6b450",
     "m3onPrimary": "#0d1017",

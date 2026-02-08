@@ -3,6 +3,13 @@
   "name": "Catppuccin Latte",
   "author": "Catppuccin",
   "darkMode": false,
+  "theme": {
+    "gtkTheme": "Catppuccin-Latte-Light",
+    "kvantumTheme": "catppuccin-latte-mauve",
+    "iconTheme": "Papirus",
+    "papirusFolderColor": "cat-latte-mauve",
+    "colorScheme": "prefer-light"
+  },
   "colors": {
     "m3primary": "#8839ef",
     "m3onPrimary": "#eff1f5",

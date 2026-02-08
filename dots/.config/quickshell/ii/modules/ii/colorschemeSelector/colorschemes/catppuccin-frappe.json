@@ -3,6 +3,13 @@
   "name": "Catppuccin Frappé",
   "author": "Catppuccin",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Catppuccin-Frappe-Dark-Frappe",
+    "kvantumTheme": "catppuccin-frappe-mauve",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "cat-frappe-mauve",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#ca9ee6",
     "m3onPrimary": "#303446",

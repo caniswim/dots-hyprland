@@ -36,6 +36,10 @@ handle_kde_material_you_colors() {
 
 pre_process() {
     local mode_flag="$1"
+    # Reset custom color scheme themes when wallpaper changes
+    if [ -f "$STATE_DIR/user/generated/active_scheme.txt" ]; then
+        bash "$CONFIG_DIR/scripts/themes/reset-system-theme.sh" "$mode_flag"
+    fi
     # Set GNOME color-scheme if mode_flag is dark or light
     if [[ "$mode_flag" == "dark" ]]; then
         gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'

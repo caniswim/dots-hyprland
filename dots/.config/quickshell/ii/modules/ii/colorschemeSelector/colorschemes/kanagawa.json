@@ -3,6 +3,13 @@
   "name": "Kanagawa",
   "author": "rebelot",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Kanagawa-Dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "indigo",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#7e9cd8",
     "m3onPrimary": "#1f1f28",

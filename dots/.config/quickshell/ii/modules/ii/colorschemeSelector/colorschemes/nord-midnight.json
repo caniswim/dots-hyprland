@@ -3,6 +3,13 @@
   "name": "Nord Midnight",
   "author": "Arctic Ice Studio",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Nordic-darker",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Nordzy-dark",
+    "papirusFolderColor": "",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#88c0d0",
     "m3onPrimary": "#0d1117",

@@ -3,6 +3,13 @@
   "name": "Material Palenight",
   "author": "Mattia Astorino",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Material-Dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "violet",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#82aaff",
     "m3onPrimary": "#292d3e",

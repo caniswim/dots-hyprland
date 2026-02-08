@@ -3,6 +3,13 @@
   "name": "Tokyo Night",
   "author": "enkia",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Tokyonight-Dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "TokyoNight-SE",
+    "papirusFolderColor": "",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#7aa2f7",
     "m3onPrimary": "#1a1b26",

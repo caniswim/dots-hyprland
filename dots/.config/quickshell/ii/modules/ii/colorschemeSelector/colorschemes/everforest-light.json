@@ -3,6 +3,13 @@
   "name": "Everforest Light",
   "author": "sainnhe",
   "darkMode": false,
+  "theme": {
+    "gtkTheme": "Everforest-Light",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus",
+    "papirusFolderColor": "green",
+    "colorScheme": "prefer-light"
+  },
   "colors": {
     "m3primary": "#5c8b3e",
     "m3onPrimary": "#fffbef",

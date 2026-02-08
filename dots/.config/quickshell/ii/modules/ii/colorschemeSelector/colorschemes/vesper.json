@@ -3,6 +3,13 @@
   "name": "Vesper",
   "author": "Rauno Freiberg",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "orange",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#ffc799",
     "m3onPrimary": "#101010",

@@ -3,6 +3,13 @@
   "name": "Monokai Pro",
   "author": "Monokai",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "orange",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#ffd866",
     "m3onPrimary": "#2d2a2e",

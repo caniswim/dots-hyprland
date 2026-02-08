@@ -3,6 +3,13 @@
   "name": "Rosé Pine Moon",
   "author": "mvllow",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "rose-pine-moon-gtk",
+    "kvantumTheme": "Rose-Pine-Moon",
+    "iconTheme": "Rose-Pine-icons",
+    "papirusFolderColor": "",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#c4a7e7",
     "m3onPrimary": "#232136",

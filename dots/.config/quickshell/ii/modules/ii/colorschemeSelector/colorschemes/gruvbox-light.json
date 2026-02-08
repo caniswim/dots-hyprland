@@ -3,6 +3,13 @@
   "name": "Gruvbox Light",
   "author": "morhetz",
   "darkMode": false,
+  "theme": {
+    "gtkTheme": "Gruvbox-Light",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Gruvbox-Plus-Light",
+    "papirusFolderColor": "",
+    "colorScheme": "prefer-light"
+  },
   "colors": {
     "m3primary": "#b57614",
     "m3onPrimary": "#fbf1c7",

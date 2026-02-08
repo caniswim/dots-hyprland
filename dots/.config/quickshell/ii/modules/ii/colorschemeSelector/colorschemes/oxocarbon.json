@@ -3,6 +3,13 @@
   "name": "Oxocarbon",
   "author": "Nyoom Engineering",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "violet",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#78a9ff",
     "m3onPrimary": "#161616",

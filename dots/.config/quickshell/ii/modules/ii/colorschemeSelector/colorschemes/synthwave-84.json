@@ -3,6 +3,13 @@
   "name": "SynthWave '84",
   "author": "Robb Owen",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "pink",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#ff7edb",
     "m3onPrimary": "#262335",

@@ -3,6 +3,13 @@
   "name": "One Dark",
   "author": "Atom",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "adw-gtk3-dark",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Papirus-Dark",
+    "papirusFolderColor": "violet",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#61afef",
     "m3onPrimary": "#282c34",

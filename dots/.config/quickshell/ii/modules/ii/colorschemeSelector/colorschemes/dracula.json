@@ -3,6 +3,13 @@
   "name": "Dracula",
   "author": "Zeno Rocha",
   "darkMode": true,
+  "theme": {
+    "gtkTheme": "Dracula",
+    "kvantumTheme": "MaterialAdw",
+    "iconTheme": "Dracula",
+    "papirusFolderColor": "",
+    "colorScheme": "prefer-dark"
+  },
   "colors": {
     "m3primary": "#bd93f9",
     "m3onPrimary": "#282a36",
