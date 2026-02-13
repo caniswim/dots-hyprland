@@ -12,6 +12,7 @@ Singleton {
 
     readonly property string schemesPath: "/home/brunno/.config/quickshell/ii/modules/ii/colorschemeSelector/colorschemes"
     readonly property string scriptsPath: "/home/brunno/.config/quickshell/ii/scripts/themes"
+    readonly property string colorsScriptsPath: "/home/brunno/.config/quickshell/ii/scripts/colors"
     property alias schemes: schemesModel
     property var schemesData: []  // Raw data for lookup
     property string currentScheme: ""
@@ -37,6 +38,7 @@ Singleton {
     }
 
     property var _loadBuffer: []
+    property var _pendingScheme: null
 
     function loadSchemes() {
         root._loadBuffer = []
@@ -96,6 +98,38 @@ Singleton {
         }
     }
 
+    Process {
+        id: writeSchemeScssProc
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn("[Colorschemes] write-scheme-scss.sh exited with code", exitCode)
+            }
+            // SCSS is written, now apply system theme (MaterialAdw will read correct colors)
+            if (root._pendingScheme) {
+                root.applySystemTheme(root._pendingScheme)
+                root._pendingScheme = null
+            }
+        }
+    }
+
+    Process {
+        id: applyTermColorsProc
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn("[Colorschemes] apply-term-colors.sh exited with code", exitCode)
+            }
+        }
+    }
+
+    Process {
+        id: setGnomeAccentProc
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn("[Colorschemes] set_gnome_accent.py exited with code", exitCode)
+            }
+        }
+    }
+
     function applySystemTheme(scheme) {
         if (!scheme || !scheme.theme) return
 
@@ -139,7 +173,44 @@ Singleton {
         Appearance.m3colors.darkmode = scheme.darkMode
 
         root.currentScheme = schemeId
-        applySystemTheme(scheme)
+
+        // 1. Write SCSS first, then applySystemTheme on completion (sequential)
+        const colorsJson = JSON.stringify(scheme.colors)
+        const dm = scheme.darkMode ? "true" : "false"
+        root._pendingScheme = scheme
+        writeSchemeScssProc.command = [
+            "bash", "-c",
+            "printf '%s' \"$1\" | " + root.colorsScriptsPath + "/write-scheme-scss.sh --darkmode " + dm,
+            "_", colorsJson
+        ]
+        writeSchemeScssProc.running = true
+
+        // 2. Apply terminal colors (parallel, independent)
+        const c = scheme.colors
+        applyTermColorsProc.command = [
+            "bash", root.colorsScriptsPath + "/apply-term-colors.sh",
+            "--term0", c.term0 || "", "--term1", c.term1 || "",
+            "--term2", c.term2 || "", "--term3", c.term3 || "",
+            "--term4", c.term4 || "", "--term5", c.term5 || "",
+            "--term6", c.term6 || "", "--term7", c.term7 || "",
+            "--term8", c.term8 || "", "--term9", c.term9 || "",
+            "--term10", c.term10 || "", "--term11", c.term11 || "",
+            "--term12", c.term12 || "", "--term13", c.term13 || "",
+            "--term14", c.term14 || "", "--term15", c.term15 || "",
+            "--bg", c.m3background || "", "--fg", c.m3onBackground || "",
+            "--selBg", c.m3surfaceVariant || ""
+        ]
+        applyTermColorsProc.running = true
+
+        // 3. Set GNOME accent color (parallel, independent)
+        if (c.m3primary) {
+            setGnomeAccentProc.command = [
+                "python3", root.colorsScriptsPath + "/set_gnome_accent.py",
+                "--color", c.m3primary
+            ]
+            setGnomeAccentProc.running = true
+        }
+
         root.schemeApplied(schemeId)
     }
 

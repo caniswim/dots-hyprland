@@ -7,6 +7,7 @@ import subprocess
 import json
 import colorsys
 import os
+import argparse
 
 # GNOME accent colors with hue ranges
 GNOME_ACCENTS = {
@@ -75,7 +76,16 @@ def get_papirus_color(h, s):
                 return color
     return 'blue'
 
-def main():
+def set_accent_only(hex_color):
+    """Set only the GNOME accent color from a hex value. No papirus/icon changes."""
+    h, s, l = hex_to_hsl(hex_color)
+    gnome_accent = get_gnome_accent(h, s)
+    subprocess.run(['gsettings', 'set', 'org.gnome.desktop.interface', 'accent-color', gnome_accent], check=True)
+    print(f"Primary: {hex_color} (H:{h:.0f} S:{s:.2f})")
+    print(f"GNOME accent: {gnome_accent}")
+
+def set_accent_full():
+    """Full behavior: read colors.json, set accent + papirus folders + icon reload."""
     state_dir = os.environ.get('XDG_STATE_HOME', os.path.expanduser('~/.local/state'))
     colors_file = f"{state_dir}/quickshell/user/generated/colors.json"
 
@@ -112,6 +122,18 @@ def main():
         print("Colors file not found")
     except Exception as e:
         print(f"Error: {e}")
+
+def main():
+    parser = argparse.ArgumentParser(description='Set GNOME accent color from Material You primary.')
+    parser.add_argument('--color', type=str, default=None,
+                        help='Hex color (e.g. #bd93f9). If provided, only sets GNOME accent. '
+                             'Without this flag, reads colors.json and also sets papirus/icons.')
+    args = parser.parse_args()
+
+    if args.color:
+        set_accent_only(args.color)
+    else:
+        set_accent_full()
 
 if __name__ == '__main__':
     main()
