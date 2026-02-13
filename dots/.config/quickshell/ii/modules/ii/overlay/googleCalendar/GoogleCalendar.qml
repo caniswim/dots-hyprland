@@ -91,6 +91,7 @@ Item {
             }
         }
         onExited: (exitCode, exitStatus) => {
+            gcalcliTimeout.running = false
             if (exitCode === 0) {
                 root.parseEvents(gcalcliProcess.buffer)
                 root.hasError = false
@@ -111,6 +112,25 @@ Item {
         }
     }
 
+    // Timeout for gcalcli (30s)
+    Timer {
+        id: gcalcliTimeout
+        interval: 30000
+        running: false
+        repeat: false
+        onTriggered: {
+            if (gcalcliProcess.running) {
+                gcalcliProcess.signal(15) // SIGTERM
+                root.hasError = true
+                root.errorMessage = "Calendar fetch timed out"
+                root.events = []
+                root.eventsByDate = {}
+                root.loading = false
+                root.mergeEventsAndTasks()
+            }
+        }
+    }
+
     // Process for gtasks-cli (Google Tasks CLI)
     Process {
         id: gtasksProcess
@@ -124,6 +144,7 @@ Item {
             }
         }
         onExited: (exitCode, exitStatus) => {
+            gtasksTimeout.running = false
             if (exitCode === 0) {
                 root.parseTasks(gtasksProcess.buffer)
             } else {
@@ -133,6 +154,22 @@ Item {
             gtasksProcess.buffer = ""
             root.tasksLoading = false
             root.mergeEventsAndTasks()
+        }
+    }
+
+    // Timeout for gtasks-cli (15s)
+    Timer {
+        id: gtasksTimeout
+        interval: 15000
+        running: false
+        repeat: false
+        onTriggered: {
+            if (gtasksProcess.running) {
+                gtasksProcess.signal(15) // SIGTERM
+                root.tasks = []
+                root.tasksLoading = false
+                root.mergeEventsAndTasks()
+            }
         }
     }
 
@@ -153,14 +190,16 @@ Item {
 
     function fetchTasks() {
         root.tasksLoading = true
-        gtasksProcess.buffer = []
+        gtasksProcess.buffer = ""
         gtasksProcess.running = true
+        gtasksTimeout.restart()
     }
 
     function fetchEvents() {
         root.loading = true
         gcalcliProcess.buffer = []
         gcalcliProcess.running = true
+        gcalcliTimeout.restart()
     }
 
     function parseEvents(lines: var) {
@@ -263,8 +302,8 @@ Item {
     }
 
     function mergeEventsAndTasks() {
-        // Only merge if both calendar and tasks have finished loading
-        if (root.loading || root.tasksLoading) {
+        // Merge as soon as events are ready; tasks will be added when they arrive
+        if (root.loading) {
             return
         }
 
@@ -425,7 +464,7 @@ Item {
             currentDate: root.currentDate
             events: root.combinedItems
             eventsByDate: root.eventsByDate
-            loading: root.loading || root.tasksLoading
+            loading: root.loading
             hasError: root.hasError
             errorMessage: root.errorMessage
             hasEventsOnDate: root.hasEventsOnDate
@@ -474,7 +513,7 @@ Item {
                 currentDate: root.currentDate
                 events: root.combinedItems
                 eventsByDate: root.eventsByDate
-                loading: root.loading || root.tasksLoading
+                loading: root.loading
                 hasError: root.hasError
                 errorMessage: root.errorMessage
                 hasEventsOnDate: root.hasEventsOnDate
