@@ -14,8 +14,8 @@ Singleton {
     id: root
 
     // Paths
-    property string workshopPath: "/mnt/Games/SteamLibrary/steamapps/workshop/content/431960"
-    property string assetsPath: "/mnt/Games/SteamLibrary/steamapps/common/wallpaper_engine/assets"
+    property string workshopPath: "/home/brunno/.local/share/Steam/steamapps/workshop/content/431960"
+    property string assetsPath: "/home/brunno/.local/share/Steam/steamapps/common/wallpaper_engine/assets"
     property string indexScriptPath: `${FileUtils.trimFileProtocol(Directories.scriptPath)}/wallpaperengine/index-we-wallpapers.sh`
     property string detectScriptPath: `${FileUtils.trimFileProtocol(Directories.scriptPath)}/wallpaperengine/detect-we-type.sh`
     property string thumbnailScriptPath: `${FileUtils.trimFileProtocol(Directories.scriptPath)}/wallpaperengine/generate-we-thumbnails.sh`

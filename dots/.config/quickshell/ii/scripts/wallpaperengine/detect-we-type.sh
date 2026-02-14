@@ -5,7 +5,7 @@
 
 set -e
 
-WORKSHOP_BASE="/mnt/Games/SteamLibrary/steamapps/workshop/content/431960"
+WORKSHOP_BASE="/home/brunno/.local/share/Steam/steamapps/workshop/content/431960"
 
 # Parse argument
 if [[ "$1" =~ ^[0-9]+$ ]]; then

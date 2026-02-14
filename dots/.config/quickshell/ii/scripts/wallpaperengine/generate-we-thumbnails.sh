@@ -5,7 +5,7 @@
 
 set -e
 
-WORKSHOP_BASE="/mnt/Games/SteamLibrary/steamapps/workshop/content/431960"
+WORKSHOP_BASE="/home/brunno/.local/share/Steam/steamapps/workshop/content/431960"
 CACHE_BASE="${XDG_CACHE_HOME:-$HOME/.cache}/thumbnails"
 
 # Thumbnail sizes

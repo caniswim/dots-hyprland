@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-WORKSHOP_BASE="/mnt/Games/SteamLibrary/steamapps/workshop/content/431960"
+WORKSHOP_BASE="/home/brunno/.local/share/Steam/steamapps/workshop/content/431960"
 CACHE_DIR="/home/brunno/.cache/quickshell"
 CACHE_FILE="$CACHE_DIR/we-wallpapers-index.json"
 SCRIPT_DIR="/home/brunno/.config/quickshell/ii/scripts/wallpaperengine"
