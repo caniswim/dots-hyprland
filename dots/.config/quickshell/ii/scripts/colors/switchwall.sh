@@ -185,9 +185,25 @@ switch() {
     color_flag="$4"
     color="$5"
 
+    # Handle Wallpaper Engine wallpapers (WE: prefix in wallpaperPath)
+    # When --noswitch is used with a WE wallpaper active, imgpath is "WE:<workshopId>".
+    # Redirect to the cached thumbnail for color generation and skip wallpaper switching.
+    local we_active=false
+    if [[ "$imgpath" == WE:* ]]; then
+        we_active=true
+        local we_id="${imgpath#WE:}"
+        local we_thumbnail="$CACHE_DIR/media/we-wallpapers/${we_id}.jpg"
+        if [[ -f "$we_thumbnail" ]]; then
+            imgpath="$we_thumbnail"
+        else
+            echo "WARNING: WE thumbnail not found: $we_thumbnail, skipping color generation"
+            return
+        fi
+    fi
+
     # Start Gemini auto-categorization if enabled
     aiStylingEnabled=$(jq -r '.background.clock.cookie.aiStyling' "$SHELL_CONFIG_FILE")
-    if [[ "$aiStylingEnabled" == "true" ]]; then
+    if [[ "$aiStylingEnabled" == "true" && "$we_active" == false ]]; then
         "$SCRIPT_DIR/../ai/gemini-categorize-wallpaper.sh" "$imgpath" > "$STATE_DIR/user/generated/wallpaper/category.txt" &
     fi
 
@@ -199,8 +215,9 @@ switch() {
     cursorposy_inverted=$((screensizey - cursorposy))
 
     # Step 1: Process wallpaper if an image was provided (independent of color_flag)
+    # Skip when WE is active — linux-wallpaperengine is already running
     local thumbnail=""
-    if [[ -n "$imgpath" ]]; then
+    if [[ -n "$imgpath" && "$we_active" == false ]]; then
         check_and_prompt_upscale "$imgpath" &
         kill_existing_mpvpaper
 
