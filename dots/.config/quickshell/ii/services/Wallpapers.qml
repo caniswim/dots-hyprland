@@ -43,6 +43,19 @@ Singleton {
     // Wallpaper Engine process
     Process {
         id: weApplyProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) console.log("[WE Apply stdout]", text.substring(0, 500))
+            }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) console.log("[WE Apply stderr]", text.substring(0, 500))
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            console.log("[WE Apply] exited with code:", exitCode, "status:", exitStatus)
+        }
     }
 
     function applyWEWallpaper(workshopId, darkMode = Appearance.m3colors.darkmode) {

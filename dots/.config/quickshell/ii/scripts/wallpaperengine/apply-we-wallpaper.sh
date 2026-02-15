@@ -112,13 +112,35 @@ fi
 
 echo "Applying Wallpaper Engine wallpaper: $WORKSHOP_ID"
 
+# Resolve preset dependencies: if project.json has "dependency" but no "type",
+# it's a preset that depends on a base wallpaper.
+# NOTE: --set-property flags are intentionally skipped because they cause
+# linux-wallpaperengine to crash on Wayland/EGL (GLEW NULL pointer).
+# The wallpaper renders with default colors instead - better than a black screen.
+DEPENDENCY_ID=$(jq -r '.dependency // empty' "$PROJECT_JSON")
+HAS_TYPE=$(jq -r '.type // empty' "$PROJECT_JSON")
+
+if [[ -n "$DEPENDENCY_ID" && -z "$HAS_TYPE" ]]; then
+    echo "Detected preset wallpaper, resolving dependency: $DEPENDENCY_ID"
+    BASE_PATH="$WORKSHOP_BASE/$DEPENDENCY_ID"
+    if [ ! -d "$BASE_PATH" ]; then
+        echo "ERROR: Base wallpaper not found: $BASE_PATH"
+        exit 1
+    fi
+    # Use the base wallpaper path and ID instead
+    WORKSHOP_PATH="$BASE_PATH"
+    PROJECT_JSON="$BASE_PATH/project.json"
+    WORKSHOP_ID="$DEPENDENCY_ID"
+    echo "Using base wallpaper: $DEPENDENCY_ID"
+fi
+
 # Cleanup previous processes
 echo "Cleaning up previous wallpaper processes..."
 "$SCRIPT_DIR/cleanup-we-processes.sh"
 
 # Detect wallpaper type and metadata
 echo "Detecting wallpaper type..."
-METADATA=$("$SCRIPT_DIR/detect-we-type.sh" "$WORKSHOP_ID")
+METADATA=$("$SCRIPT_DIR/detect-we-type.sh" "$WORKSHOP_PATH")
 WE_TYPE=$(echo "$METADATA" | jq -r '.type')
 WE_TITLE=$(echo "$METADATA" | jq -r '.title')
 WE_FILE=$(echo "$METADATA" | jq -r '.file')
@@ -148,8 +170,8 @@ done
 # Add wallpaper path
 CMD="$CMD \"$WORKSHOP_PATH\""
 
-# Execute in background with nohup to prevent termination when parent exits
-nohup bash -c "$CMD" > /tmp/wallpaper-engine.log 2>&1 &
+# Execute in background with setsid to fully detach from parent process group
+setsid bash -c "$CMD" > /tmp/wallpaper-engine.log 2>&1 &
 WE_PID=$!
 disown
 
@@ -266,7 +288,7 @@ if [ "$NO_COLOR_GEN" = false ]; then
 
             # Generate colors using matugen (generates colors.json)
             echo "Running matugen..."
-            matugen image "$THUMBNAIL" --mode "$MODE_FLAG" --type "$TYPE_FLAG"
+            matugen --source-color-index 0 image "$THUMBNAIL" --mode "$MODE_FLAG" --type "$TYPE_FLAG"
 
             # Source venv and generate terminal colors
             if [ -f "$VENV_PATH/bin/activate" ]; then
