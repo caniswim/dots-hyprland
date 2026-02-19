@@ -107,6 +107,12 @@ Singleton {
             property JsonObject appearance: JsonObject {
                 property bool extraBackgroundTint: true
                 property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
+                property JsonObject screenBorder: JsonObject {
+                    property bool enable: false
+                    property int thickness: 3
+                    property int rounding: 23 // Appearance.rounding.screenRounding default
+                    property bool useOutlineColor: false // false = m3surface, true = outlineVariant
+                }
                 property JsonObject fonts: JsonObject {
                     property string main: "Google Sans Flex"
                     property string numbers: "Google Sans Flex"
