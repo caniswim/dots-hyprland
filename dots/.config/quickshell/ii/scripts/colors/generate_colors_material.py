@@ -4,7 +4,7 @@ import math
 import json
 from PIL import Image
 from materialyoucolor.quantize import QuantizeCelebi
-from materialyoucolor.score.score import Score
+from materialyoucolor.score.score import Score, ScoreOptions
 from materialyoucolor.hct import Hct
 from materialyoucolor.dynamiccolor.material_dynamic_colors import MaterialDynamicColors
 from materialyoucolor.utils.color_utils import (rgba_from_argb, argb_from_rgb, argb_from_rgba)
@@ -74,7 +74,8 @@ if args.path is not None:
     if wsize_new < wsize or hsize_new < hsize:
         image = image.resize((wsize_new, hsize_new), Image.Resampling.BICUBIC)
     colors = QuantizeCelebi(list(image.getdata()), 128)
-    argb = Score.score(colors)[0]
+    score_options = ScoreOptions(desired=4, fallback_color_argb=4282549748, filter=True, dislike_filter=True)
+    argb = Score.score(colors, score_options)[0]
 
     if args.cache is not None:
         with open(args.cache, 'w') as file:
