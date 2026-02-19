@@ -121,7 +121,7 @@ MouseArea { // Notification group area
         id: background
         anchors.left: parent.left
         width: parent.width
-        color: popup ? Appearance.colors.colBackgroundSurfaceContainer : Appearance.colors.colLayer2
+        color: popup ? Qt.rgba(Appearance.colors.colBackgroundSurfaceContainer.r, Appearance.colors.colBackgroundSurfaceContainer.g, Appearance.colors.colBackgroundSurfaceContainer.b, 0.7) : Appearance.colors.colLayer2
         radius: Appearance.rounding.normal
         anchors.leftMargin: root.xOffset
 

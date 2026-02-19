@@ -48,28 +48,28 @@ RippleButton {
     contentItem: Item {
         anchors.fill: parent
 
-        MaterialSymbol {
+        Column {
             anchors.centerIn: parent
-            color: button.colText
-            horizontalAlignment: Text.AlignHCenter
-            iconSize: 45
-            text: button.deviceIcon
-        }
+            spacing: 2
 
-        // EQ indicator
-        MaterialSymbol {
-            visible: button.hasEq
-            anchors {
-                right: parent.right
-                bottom: parent.bottom
-                rightMargin: 12
-                bottomMargin: 12
+            MaterialSymbol {
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: button.colText
+                horizontalAlignment: Text.AlignHCenter
+                iconSize: 45
+                text: button.deviceIcon
             }
-            color: button.colText
-            horizontalAlignment: Text.AlignHCenter
-            iconSize: 16
-            text: "graphic_eq"
-            opacity: 0.8
+
+            // EQ indicator
+            MaterialSymbol {
+                visible: button.hasEq
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: button.colText
+                horizontalAlignment: Text.AlignHCenter
+                iconSize: 16
+                text: "graphic_eq"
+                opacity: 0.8
+            }
         }
     }
 

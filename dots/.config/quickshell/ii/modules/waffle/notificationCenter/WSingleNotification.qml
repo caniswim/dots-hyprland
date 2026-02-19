@@ -59,7 +59,7 @@ MouseArea {
     Rectangle {
         id: contentItem
         width: parent.width
-        color: root.isPopup ? Looks.colors.bg0 : Looks.colors.bgPanelBody
+        color: root.isPopup ? Qt.rgba(Looks.colors.bg0.r, Looks.colors.bg0.g, Looks.colors.bg0.b, 0.7) : Looks.colors.bgPanelBody
         radius: root.isPopup ? Looks.radius.large : Looks.radius.medium
         property real padding: 12
         implicitHeight: notificationContent.implicitHeight + padding * 2
