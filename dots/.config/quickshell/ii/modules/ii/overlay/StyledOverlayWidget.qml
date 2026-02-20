@@ -38,6 +38,12 @@ AbstractOverlayWidget {
     property real resizeMargin: 8
     property real padding: 6
     property real contentRadius: radius - padding
+    readonly property int _borderInset: (Config.options.appearance.screenBorder?.enable ?? false) ? (Config.options.appearance.screenBorder?.thickness ?? 3) : 0
+    readonly property int _barSize: Config.options.bar.vertical ? Appearance.sizes.baseVerticalBarWidth : Appearance.sizes.baseBarHeight
+    readonly property int insetTop: ((!Config.options.bar.vertical && !Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+    readonly property int insetBottom: ((!Config.options.bar.vertical && Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+    readonly property int insetLeft: ((Config.options.bar.vertical && !Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+    readonly property int insetRight: ((Config.options.bar.vertical && Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
 
     // Resizing
     function getXResizeDirection(x) {
@@ -74,15 +80,15 @@ AbstractOverlayWidget {
     }
 
     // Positioning & sizing
-    x: Math.round(persistentStateEntry.x) // Round or it'll be blurry
-    y: Math.round(persistentStateEntry.y) // Round or it'll be blurry
+    x: Math.round(persistentStateEntry.x)
+    y: Math.round(persistentStateEntry.y)
     pinned: persistentStateEntry.pinned
     clickthrough: persistentStateEntry.clickthrough
     drag {
         minimumX: 0
         minimumY: 0
-        maximumX: root.parent?.width - root.width
-        maximumY: root.parent?.height - root.height
+        maximumX: root.parent?.width - root.width - insetLeft - insetRight
+        maximumY: root.parent?.height - root.height - insetTop - insetBottom
     }
     opacity: (GlobalStates.overlayOpen || !clickthrough) ? 1.0 : Config.options.overlay.clickthroughOpacity
 
@@ -148,9 +154,9 @@ AbstractOverlayWidget {
             }
         }
         xAxis.minimum: 0
-        xAxis.maximum: root.parent?.width - root.width
+        xAxis.maximum: root.parent?.width - root.width - root.insetLeft - root.insetRight
         yAxis.minimum: 0
-        yAxis.maximum: root.parent?.height - root.height
+        yAxis.maximum: root.parent?.height - root.height - root.insetTop - root.insetBottom
     }
 
     function close() {

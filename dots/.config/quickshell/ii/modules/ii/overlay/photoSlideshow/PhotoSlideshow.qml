@@ -343,6 +343,13 @@ Item {
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         exclusionMode: ExclusionMode.Ignore
 
+        property int _borderInset: (Config.options.appearance.screenBorder?.enable ?? false) ? (Config.options.appearance.screenBorder?.thickness ?? 3) : 0
+        property int _barSize: Config.options.bar.vertical ? Appearance.sizes.baseVerticalBarWidth : Appearance.sizes.baseBarHeight
+        property int insetTop: ((!Config.options.bar.vertical && !Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+        property int insetLeft: ((Config.options.bar.vertical && !Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+        property int insetRight: ((Config.options.bar.vertical && Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+        property int insetBottom: ((!Config.options.bar.vertical && Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+
         // Posição e tamanho do estado persistente
         anchors {
             top: true
@@ -354,8 +361,8 @@ Item {
 
         // Margem para posicionar
         margins {
-            top: root.persistentState.y
-            left: root.persistentState.x
+            top: root.persistentState.y + insetTop
+            left: root.persistentState.x + insetLeft
         }
 
         // Conteúdo do slideshow

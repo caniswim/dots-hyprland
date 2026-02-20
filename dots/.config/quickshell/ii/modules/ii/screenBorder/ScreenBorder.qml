@@ -49,12 +49,8 @@ Variants {
         // Bar awareness
         property bool isHug: Config.options.bar.cornerStyle === 0
         property bool isVerticalBar: Config.options.bar.vertical
-        // For horizontal bar: bar.bottom means bar is at bottom, otherwise top
-        // For vertical bar: bar.bottom means bar is at right, otherwise left
         property bool barAtBottom: Config.options.bar.bottom
 
-        // Margins: on the bar's hug side, extend the margin to match the bar size
-        // so the border's inner curve aligns with the bar's RoundCorner
         property int barSideMargin: isHug
             ? (isVerticalBar ? Appearance.sizes.baseVerticalBarWidth : Appearance.sizes.baseBarHeight)
             : borderThickness
@@ -63,10 +59,6 @@ Variants {
         property int maskBottomMargin: (!isVerticalBar && barAtBottom && isHug) ? barSideMargin : borderThickness
         property int maskLeftMargin: (isVerticalBar && !barAtBottom && isHug) ? barSideMargin : borderThickness
         property int maskRightMargin: (isVerticalBar && barAtBottom && isHug) ? barSideMargin : borderThickness
-
-        // Per-corner rounding: on the bar's hug side, match screenRounding;
-        // on the other side, use the configured borderRounding
-        property int barSideRounding: isHug ? Appearance.rounding.screenRounding : borderRounding
 
         property int roundingTopLeft: {
             if (isHug) {
@@ -97,7 +89,6 @@ Variants {
             return borderRounding
         }
 
-        // Colored rectangle filling the entire window, masked to show only the border frame
         Rectangle {
             id: borderRect
             anchors.fill: parent
@@ -113,13 +104,13 @@ Variants {
             }
         }
 
-        // Invisible mask: defines the "hole" (everything inside the border)
         Item {
             id: borderMask
             anchors.fill: parent
             layer.enabled: true
             visible: false
 
+            // Inner hole
             Rectangle {
                 anchors.fill: parent
                 anchors.topMargin: borderWindow.maskTopMargin
@@ -130,6 +121,16 @@ Variants {
                 topRightRadius: borderWindow.roundingTopRight
                 bottomLeftRadius: borderWindow.roundingBottomLeft
                 bottomRightRadius: borderWindow.roundingBottomRight
+            }
+
+            // Bar exclusion: mask out the entire bar area so the border
+            // never renders there, regardless of surface z-order
+            Rectangle {
+                visible: borderWindow.isHug
+                x: borderWindow.isVerticalBar && borderWindow.barAtBottom ? parent.width - width : 0
+                y: !borderWindow.isVerticalBar && borderWindow.barAtBottom ? parent.height - height : 0
+                width: borderWindow.isVerticalBar ? borderWindow.barSideMargin : parent.width
+                height: borderWindow.isVerticalBar ? parent.height : borderWindow.barSideMargin
             }
         }
     }
