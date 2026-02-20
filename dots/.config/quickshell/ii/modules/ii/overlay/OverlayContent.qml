@@ -40,7 +40,14 @@ Item {
     }
 
     WidgetCanvas {
+        property int _borderInset: (Config.options.appearance.screenBorder?.enable ?? false) ? (Config.options.appearance.screenBorder?.thickness ?? 3) : 0
+        property int _barSize: Config.options.bar.vertical ? Appearance.sizes.baseVerticalBarWidth : Appearance.sizes.baseBarHeight
+
         anchors.fill: parent
+        anchors.topMargin: ((!Config.options.bar.vertical && !Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+        anchors.bottomMargin: ((!Config.options.bar.vertical && Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+        anchors.leftMargin: ((Config.options.bar.vertical && !Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
+        anchors.rightMargin: ((Config.options.bar.vertical && Config.options.bar.bottom) ? _barSize : _borderInset) + _borderInset
         onClicked: GlobalStates.overlayOpen = false
 
         OverlayTaskbar {
