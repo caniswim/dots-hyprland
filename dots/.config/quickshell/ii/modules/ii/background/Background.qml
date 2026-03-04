@@ -52,6 +52,8 @@ Variants {
         property real effectiveWallpaperScale: 1 // Some reasonable init value, to be updated
         property int wallpaperWidth: modelData.width // Some reasonable init value, to be updated
         property int wallpaperHeight: modelData.height // Some reasonable init value, to be updated
+        property bool shouldTile: false // Auto-tile when image is smaller than screen
+        property bool tileEffectsActive: shouldTile && Config.options.background.tilePopArt && !wallpaperSafetyTriggered && !wallpaperIsVideo && !wallpaperIsWE
         property real movableXSpace: ((wallpaperWidth / wallpaperToScreenRatio * effectiveWallpaperScale) - screen.width) / 2
         property real movableYSpace: ((wallpaperHeight / wallpaperToScreenRatio * effectiveWallpaperScale) - screen.height) / 2
         readonly property bool verticalParallax: (Config.options.background.parallax.autoVertical && wallpaperHeight > wallpaperWidth) || Config.options.background.parallax.vertical
@@ -112,11 +114,17 @@ Variants {
                     bgRoot.wallpaperWidth = width;
                     bgRoot.wallpaperHeight = height;
 
-                    if (width <= screenWidth || height <= screenHeight) {
-                        // Undersized/perfectly sized wallpapers
+                    if (width < screenWidth && height < screenHeight) {
+                        // Both dimensions smaller than screen: tile the image
+                        bgRoot.shouldTile = true;
+                        bgRoot.effectiveWallpaperScale = 1;
+                    } else if (width <= screenWidth || height <= screenHeight) {
+                        // Undersized in one dimension: scale up to cover
+                        bgRoot.shouldTile = false;
                         bgRoot.effectiveWallpaperScale = Math.max(screenWidth / width, screenHeight / height);
                     } else {
                         // Oversized = can be zoomed for parallax, yay
+                        bgRoot.shouldTile = false;
                         bgRoot.effectiveWallpaperScale = Math.min(bgRoot.preferredWallpaperScale, width / screenWidth, height / screenHeight);
                     }
                 }
@@ -130,7 +138,7 @@ Variants {
             // Wallpaper
             StyledImage {
                 id: wallpaper
-                visible: opacity > 0 && !blurLoader.active
+                visible: opacity > 0 && !blurLoader.active && !tileEffectLoader.active
                 opacity: (status === Image.Ready && !bgRoot.wallpaperIsVideo && !bgRoot.wallpaperIsWE) ? 1 : 0
                 cache: false
                 smooth: false
@@ -158,10 +166,10 @@ Variants {
                 }
                 property real effectiveValueX: Math.max(0, Math.min(1, valueX))
                 property real effectiveValueY: Math.max(0, Math.min(1, valueY))
-                x: -(bgRoot.movableXSpace) - (effectiveValueX - 0.5) * 2 * bgRoot.movableXSpace
-                y: -(bgRoot.movableYSpace) - (effectiveValueY - 0.5) * 2 * bgRoot.movableYSpace
+                x: bgRoot.shouldTile ? 0 : -(bgRoot.movableXSpace) - (effectiveValueX - 0.5) * 2 * bgRoot.movableXSpace
+                y: bgRoot.shouldTile ? 0 : -(bgRoot.movableYSpace) - (effectiveValueY - 0.5) * 2 * bgRoot.movableYSpace
                 source: bgRoot.wallpaperSafetyTriggered ? "" : bgRoot.wallpaperPath
-                fillMode: Image.PreserveAspectCrop
+                fillMode: bgRoot.shouldTile ? Image.Tile : Image.PreserveAspectCrop
                 Behavior on x {
                     NumberAnimation {
                         duration: 600
@@ -175,11 +183,23 @@ Variants {
                     }
                 }
                 sourceSize {
-                    width: bgRoot.screen.width * bgRoot.effectiveWallpaperScale * bgRoot.monitor.scale
-                    height: bgRoot.screen.height * bgRoot.effectiveWallpaperScale * bgRoot.monitor.scale
+                    width: bgRoot.shouldTile ? bgRoot.wallpaperWidth : bgRoot.screen.width * bgRoot.effectiveWallpaperScale * bgRoot.monitor.scale
+                    height: bgRoot.shouldTile ? bgRoot.wallpaperHeight : bgRoot.screen.height * bgRoot.effectiveWallpaperScale * bgRoot.monitor.scale
                 }
-                width: bgRoot.wallpaperWidth / bgRoot.wallpaperToScreenRatio * bgRoot.effectiveWallpaperScale
-                height: bgRoot.wallpaperHeight / bgRoot.wallpaperToScreenRatio * bgRoot.effectiveWallpaperScale
+                width: bgRoot.shouldTile ? bgRoot.screen.width : bgRoot.wallpaperWidth / bgRoot.wallpaperToScreenRatio * bgRoot.effectiveWallpaperScale
+                height: bgRoot.shouldTile ? bgRoot.screen.height : bgRoot.wallpaperHeight / bgRoot.wallpaperToScreenRatio * bgRoot.effectiveWallpaperScale
+            }
+
+            // Warhol Pop Art tile effect
+            Loader {
+                id: tileEffectLoader
+                active: bgRoot.tileEffectsActive
+                anchors.fill: parent
+                sourceComponent: WallpaperTileEffect {
+                    source: bgRoot.wallpaperPath
+                    imageWidth: bgRoot.wallpaperWidth
+                    imageHeight: bgRoot.wallpaperHeight
+                }
             }
 
             Loader {

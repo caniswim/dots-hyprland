@@ -40,7 +40,7 @@ Variants {
         StyledImage {
             anchors.fill: parent
             source: Config.options.background.wallpaperPath
-            fillMode: Image.PreserveAspectCrop
+            fillMode: (sourceSize.width > 0 && sourceSize.width < panelRoot.width && sourceSize.height < panelRoot.height) ? Image.Tile : Image.PreserveAspectCrop
         }
     }
 }

@@ -176,6 +176,7 @@ MouseArea {
                             { icon: "movie", name: "Videos", path: Directories.videos },
                             { icon: "", name: "---", path: "INTENTIONALLY_INVALID_DIR" },
                             { icon: "wallpaper", name: "Wallpapers", path: `${Directories.pictures}/Wallpapers` },
+                            { icon: "cloud", name: "iCloud", path: `${Directories.cache}/icloud-photos` },
                             { icon: "videogame_asset", name: "Workshop", path: "WALLPAPER_ENGINE", isWE: true },
                             ...(Config.options.policies.weeb === 1 ? [{ icon: "favorite", name: "Homework", path: `${Directories.pictures}/homework` }] : []),
                         ]
@@ -389,6 +390,16 @@ MouseArea {
                             text: root.useDarkMode ? "dark_mode" : "light_mode"
                             StyledToolTip {
                                 text: Translation.tr("Click to toggle light/dark mode\n(applied when wallpaper is chosen)")
+                            }
+                        }
+
+                        IconToolbarButton {
+                            implicitWidth: height
+                            toggled: Config.options.background.tilePopArt
+                            onClicked: Config.options.background.tilePopArt = !Config.options.background.tilePopArt
+                            text: "auto_awesome"
+                            StyledToolTip {
+                                text: Translation.tr("Toggle Pop Art effect for tiled wallpapers")
                             }
                         }
 

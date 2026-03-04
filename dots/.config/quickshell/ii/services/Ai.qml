@@ -305,14 +305,27 @@ Singleton {
     }
     property ApiStrategy currentApiStrategy: apiStrategies[models[currentModelId]?.api_format || "openai"]
 
+    function loadExtraModels() {
+        console.log("[Ai] loadExtraModels called. Config.ready:", Config.ready);
+        console.log("[Ai] Config.options.ai:", JSON.stringify(Config?.options?.ai?.extraModels));
+        const extras = Config?.options.ai?.extraModels ?? [];
+        console.log("[Ai] extraModels count:", extras.length);
+        if (extras.length === 0) return;
+        extras.forEach(model => {
+            const safeModelName = root.safeModelName(model["model"]);
+            console.log("[Ai] Adding model:", safeModelName, model["name"]);
+            root.addModel(safeModelName, model)
+        });
+        root.modelList = Object.keys(root.models);
+        console.log("[Ai] modelList updated:", JSON.stringify(root.modelList));
+    }
+
     Connections {
         target: Config
         function onReadyChanged() {
+            console.log("[Ai] onReadyChanged fired. Config.ready:", Config.ready);
             if (!Config.ready) return;
-            (Config?.options.ai?.extraModels ?? []).forEach(model => {
-                const safeModelName = root.safeModelName(model["model"]);
-                root.addModel(safeModelName, model)
-            });
+            root.loadExtraModels();
         }
     }
 
@@ -320,6 +333,9 @@ Singleton {
     property string pendingFilePath: ""
 
     Component.onCompleted: {
+        console.log("[Ai] Component.onCompleted. Config.ready:", Config.ready);
+        // Load extra models immediately if Config is already ready (race condition)
+        if (Config.ready) loadExtraModels();
         setModel(currentModelId, false, false); // Do necessary setup for model
     }
 
