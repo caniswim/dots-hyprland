@@ -60,11 +60,16 @@ Singleton {
 
     function applyWEWallpaper(workshopId, darkMode = Appearance.m3colors.darkmode) {
         if (!workshopId || workshopId.length === 0) return
-        weApplyProc.exec([
+        const args = [
             Directories.weWallpaperScriptPath,
             "--id", workshopId,
             "--mode", (darkMode ? "dark" : "light")
-        ])
+        ]
+        if (Config.options.background.wallpaperEngine.enableSound)
+            args.push("--sound")
+        if (!Config.options.background.wallpaperEngine.enableAudioProcessing)
+            args.push("--no-audio-processing")
+        weApplyProc.exec(args)
         root.changed()
     }
 

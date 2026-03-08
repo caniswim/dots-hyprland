@@ -210,6 +210,8 @@ Singleton {
                     property bool isActive: false
                     property string workshopId: ""
                     property string type: ""
+                    property bool enableSound: false
+                    property bool enableAudioProcessing: true
                 }
                 property string wallpaperPath: ""
                 property string thumbnailPath: ""

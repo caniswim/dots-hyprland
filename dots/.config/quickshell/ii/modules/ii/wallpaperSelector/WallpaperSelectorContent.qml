@@ -406,6 +406,32 @@ MouseArea {
                         IconToolbarButton {
                             visible: root.showingWEWallpapers
                             implicitWidth: height
+                            toggled: Config.options.background.wallpaperEngine.enableSound
+                            onClicked: Config.options.background.wallpaperEngine.enableSound = !Config.options.background.wallpaperEngine.enableSound
+                            text: Config.options.background.wallpaperEngine.enableSound ? "volume_up" : "volume_off"
+                            StyledToolTip {
+                                text: Config.options.background.wallpaperEngine.enableSound
+                                    ? Translation.tr("Wallpaper sound enabled\nClick to mute")
+                                    : Translation.tr("Wallpaper sound muted\nClick to enable")
+                            }
+                        }
+
+                        IconToolbarButton {
+                            visible: root.showingWEWallpapers
+                            implicitWidth: height
+                            toggled: Config.options.background.wallpaperEngine.enableAudioProcessing
+                            onClicked: Config.options.background.wallpaperEngine.enableAudioProcessing = !Config.options.background.wallpaperEngine.enableAudioProcessing
+                            text: Config.options.background.wallpaperEngine.enableAudioProcessing ? "graphic_eq" : "music_off"
+                            StyledToolTip {
+                                text: Config.options.background.wallpaperEngine.enableAudioProcessing
+                                    ? Translation.tr("Audio visualization enabled\nClick to disable")
+                                    : Translation.tr("Audio visualization disabled\nClick to enable")
+                            }
+                        }
+
+                        IconToolbarButton {
+                            visible: root.showingWEWallpapers
+                            implicitWidth: height
                             onClicked: WallpaperEngine.forceReindex()
                             text: "refresh"
                             StyledToolTip {

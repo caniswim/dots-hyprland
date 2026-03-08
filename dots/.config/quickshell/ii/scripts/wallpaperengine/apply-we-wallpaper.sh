@@ -57,6 +57,8 @@ WORKSHOP_ID=""
 MODE_FLAG="dark"
 TYPE_FLAG="scheme-tonal-spot"
 NO_COLOR_GEN=false
+ENABLE_SOUND=false
+NO_AUDIO_PROCESSING=false
 FPS=60
 
 # Parse arguments
@@ -76,6 +78,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-color-gen)
             NO_COLOR_GEN=true
+            shift
+            ;;
+        --sound)
+            ENABLE_SOUND=true
+            shift
+            ;;
+        --no-audio-processing)
+            NO_AUDIO_PROCESSING=true
             shift
             ;;
         --fps)
@@ -160,7 +170,12 @@ echo "Starting linux-wallpaperengine..."
 CMD="linux-wallpaperengine"
 CMD="$CMD --assets-dir \"$ASSETS_DIR\""
 CMD="$CMD --fps $FPS"
-CMD="$CMD --silent"  # Mute by default
+if [ "$ENABLE_SOUND" = false ]; then
+    CMD="$CMD --silent"
+fi
+if [ "$NO_AUDIO_PROCESSING" = true ]; then
+    CMD="$CMD --no-audio-processing"
+fi
 
 # Add monitors
 for monitor in $MONITORS; do
@@ -182,9 +197,13 @@ if [ -f "$SHELL_CONFIG_FILE" ]; then
     jq --arg workshopId "$WORKSHOP_ID" \
        --arg type "$WE_TYPE" \
        --arg title "$WE_TITLE" \
+       --argjson enableSound "$ENABLE_SOUND" \
+       --argjson noAudioProcessing "$NO_AUDIO_PROCESSING" \
        '.background.wallpaperEngine.isActive = true |
         .background.wallpaperEngine.workshopId = $workshopId |
         .background.wallpaperEngine.type = $type |
+        .background.wallpaperEngine.enableSound = $enableSound |
+        .background.wallpaperEngine.enableAudioProcessing = ($noAudioProcessing | not) |
         .background.wallpaperPath = ("WE:" + $workshopId)' \
        "$SHELL_CONFIG_FILE" > "$SHELL_CONFIG_FILE.tmp" && mv "$SHELL_CONFIG_FILE.tmp" "$SHELL_CONFIG_FILE"
 fi
@@ -228,11 +247,20 @@ fi
 # Get monitors
 MONITORS=$(hyprctl monitors -j | jq -r '.[] | .name')
 
+# Read sound settings from config
+ENABLE_SOUND=$(jq -r '.background.wallpaperEngine.enableSound // false' "$SHELL_CONFIG_FILE")
+ENABLE_AUDIO_PROC=$(jq -r '.background.wallpaperEngine.enableAudioProcessing // true' "$SHELL_CONFIG_FILE")
+
 # Apply wallpaper
 CMD="linux-wallpaperengine"
 CMD="$CMD --assets-dir \"$ASSETS_DIR\""
 CMD="$CMD --fps 60"
-CMD="$CMD --silent"
+if [ "$ENABLE_SOUND" != "true" ]; then
+    CMD="$CMD --silent"
+fi
+if [ "$ENABLE_AUDIO_PROC" != "true" ]; then
+    CMD="$CMD --no-audio-processing"
+fi
 
 for monitor in $MONITORS; do
     CMD="$CMD --screen-root $monitor"

@@ -34,11 +34,20 @@ fi
 # Get monitors
 MONITORS=$(hyprctl monitors -j | jq -r '.[] | .name')
 
+# Read sound settings from config
+ENABLE_SOUND=$(jq -r '.background.wallpaperEngine.enableSound // false' "$SHELL_CONFIG_FILE")
+ENABLE_AUDIO_PROC=$(jq -r '.background.wallpaperEngine.enableAudioProcessing // true' "$SHELL_CONFIG_FILE")
+
 # Apply wallpaper
 CMD="linux-wallpaperengine"
 CMD="$CMD --assets-dir \"$ASSETS_DIR\""
 CMD="$CMD --fps 60"
-CMD="$CMD --silent"
+if [ "$ENABLE_SOUND" != "true" ]; then
+    CMD="$CMD --silent"
+fi
+if [ "$ENABLE_AUDIO_PROC" != "true" ]; then
+    CMD="$CMD --no-audio-processing"
+fi
 
 for monitor in $MONITORS; do
     CMD="$CMD --screen-root $monitor"
